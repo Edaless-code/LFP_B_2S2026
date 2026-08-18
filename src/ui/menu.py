@@ -1,0 +1,15 @@
+def mostrar_menu():
+    print("==========================================")
+    print("         TORNEO DE SUDOKU - NUMERIX")
+    print("==========================================")
+    print("1. Cargar archivo de sudokus")
+    print("2. Cargar archivo de jugadores")
+    print("3. Cargar archivo de intentos")
+    print("4. Validar y calificar intentos")
+    print("5. Generar Reporte: Resumen por Sudoku")
+    print("6. Generar Reporte: Rendimiento por Jugador")
+    print("7. Generar Reporte: Top 10 Mejores Tiempos")
+    print("8. Salir")
+    print()
+    opcion = input("Seleccione una opcion: ")
+    return opcion
