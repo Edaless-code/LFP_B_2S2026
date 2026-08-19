@@ -11,36 +11,45 @@ from services.validador_sudoku import ValidadorSudoku
 class CargadorArchivos:
 
     def cargar_sudokus(self, ruta_archivo):
-        sudokus = {}   # diccionario: id_sudoku -> objeto Tablero
+        sudokus = {}
         with open(ruta_archivo, "r") as archivo:
             lineas = archivo.readlines()
-            for linea in lineas:
-                linea = linea.strip()   # quita el salto de linea al final
+            for numero_linea, linea in enumerate(lineas, start=1):
+                linea = linea.strip()
                 if linea == "":
-                    continue            # ignora lineas vacias
-                datos = linea.split(",")
-                id_sudoku = datos[0]
-                dificultad = datos[1]
-                tablero_str = datos[2]
-                tablero = Tablero(id_sudoku, dificultad, tablero_str)
-                sudokus[tablero.id_sudoku] = tablero
+                    continue
+                try:
+                    datos = linea.split(",")
+                    id_sudoku = datos[0]
+                    dificultad = datos[1]
+                    tablero_str = datos[2]
+                    if len(tablero_str) != 81:
+                        raise ValueError(f"el tablero debe tener 81 caracteres, tiene {len(tablero_str)}")
+                    tablero = Tablero(id_sudoku, dificultad, tablero_str)
+                    sudokus[tablero.id_sudoku] = tablero
+                except (ValueError, IndexError) as error:
+                    print(f"Linea {numero_linea} invalida en sudokus.lfp, se omite: {error}")
         return sudokus
+
 
     def cargar_jugadores(self, ruta_archivo):
         jugadores = {}
         with open(ruta_archivo, "r") as archivo:
             lineas = archivo.readlines()
-            for linea in lineas:
+            for numero_linea, linea in enumerate(lineas, start=1):
                 linea = linea.strip()
                 if linea == "":
                     continue
-                datos = linea.split(",")
-                carnet = datos[0]
-                nombre = datos[1]
-                apellido = datos[2]
-                nivel = datos[3]
-                jugador = Jugador(carnet, nombre, apellido, nivel)
-                jugadores[jugador.carnet] = jugador
+                try:
+                    datos = linea.split(",")
+                    carnet = datos[0]
+                    nombre = datos[1]
+                    apellido = datos[2]
+                    nivel = datos[3]
+                    jugador = Jugador(carnet, nombre, apellido, nivel)
+                    jugadores[jugador.carnet] = jugador
+                except (ValueError, IndexError) as error:
+                    print(f"Linea {numero_linea} invalida en jugadores.lfp, se omite: {error}")
         return jugadores
 
 
@@ -48,19 +57,27 @@ class CargadorArchivos:
         intentos = []
         with open(ruta_archivo, "r") as archivo:
             lineas = archivo.readlines()
-            for linea in lineas:
+            for numero_linea, linea in enumerate(lineas, start=1):
                 linea = linea.strip()
                 if linea == "":
                     continue
-                datos = linea.split(",")
-                carnet = datos[0]
-                id_sudoku = datos[1]
-                solucion = datos[2]
-                tiempo_segundos = datos[3]
-                fecha = datos[4]
-                intento = Intento(carnet, id_sudoku, solucion, tiempo_segundos, fecha)
-                intentos.append(intento)
+                try:
+                    datos = linea.split(",")
+                    carnet = datos[0]
+                    id_sudoku = datos[1]
+                    solucion = datos[2]
+                    tiempo_segundos = datos[3]
+                    fecha = datos[4]
+                    if len(solucion) != 81:
+                        raise ValueError(f"la solucion debe tener 81 caracteres, tiene {len(solucion)}")
+                    intento = Intento(carnet, id_sudoku, solucion, tiempo_segundos, fecha)
+                    intentos.append(intento)
+                except (ValueError, IndexError) as error:
+                    print(f"Linea {numero_linea} invalida en intentos.lfp, se omite: {error}")
         return intentos
+
+
+        
 
 if __name__ == "__main__":
     c = CargadorArchivos()
