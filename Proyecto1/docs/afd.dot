@@ -1,0 +1,59 @@
+digraph AFD_HorarioScript {
+    rankdir=LR;
+    fontname="Helvetica";
+    fontsize=10;
+    labelloc="b";
+    label="\nTransiciones no dibujadas -> GestorErrores (modo panico)    |    Doble circulo = acepta por retroceso (lookahead de 1)    |    El rango 06:00-21:00 se valida al aceptar en q9, fuera del AFD\n";
+
+    graph [nodesep=0.55, ranksep=1.0, pad=0.35];
+    node  [fontname="Helvetica", fontsize=11, width=0.6];
+    edge  [fontname="Helvetica", fontsize=9, arrowsize=0.8];
+
+    subgraph cluster_afd {
+        pencolor="white";
+        fontname="Helvetica";
+        fontsize=15;
+        labelloc="t";
+        label="AFD de HorarioScript - Analizador Lexico\nEdgar Alessandro Chocon Oliva - 202212978\n ";
+
+        inicio [shape=point, width=0.12];
+
+        node [shape=doublecircle];
+        q1; q3; q4; q5; q6; q9; q12;
+
+        node [shape=circle];
+        q0; q2; q7; q8; q10; q11;
+
+        inicio -> q0;
+
+        
+        // Comentarios de linea
+        q0  -> q11 [label="#"];
+        q11 -> q12 [label="#"];
+        q12 -> q12 [label="cualquiera excepto \\n"];
+
+        // Cadenas y codigos entrecomillados
+        q0  -> q10 [label="\""];
+        q10 -> q10 [label="cualquiera excepto \" y \\n"];
+        q10 -> q0  [label="\"\nemite CADENA o CODIGO"];
+
+        // Enteros y horas
+        q0 -> q4 [label="digito"];
+        q4 -> q5 [label="digito"];
+        q5 -> q6 [label="digito"];
+        q6 -> q6 [label="digito"];
+        q5 -> q7 [label=":"];
+        q7 -> q8 [label="digito"];
+        q8 -> q9 [label="digito"];
+
+        // Palabras reservadas y codigos
+        q0 -> q1 [label="letra"];
+        q1 -> q1 [label="letra | digito"];
+        q1 -> q2 [label="-"];
+        q2 -> q3 [label="digito"];
+        q3 -> q3 [label="digito"];
+
+        // Bucle de q0: simbolos y blancos
+        q0 -> q0 [fontsize=9, label="{ } [ ] : , ;  ->  emite SIMBOLO\lespacio, tab, \\n  ->  ignora\l"];
+    }
+}
