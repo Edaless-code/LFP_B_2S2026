@@ -1,0 +1,27 @@
+## Archivo con errores lexicos deliberados, uno por cada categoria
+## Los caracteres raros DENTRO de esta linea de comentario no son error: @ % ~
+
+HORARIO {
+  CURSOS {
+    ## El @ dentro de la cadena tampoco es error
+    curso: "Analisis @ Diseno 100%" [codigo: "LFP-0796", creditos: 4],
+    ## CODIGO_MAL_FORMADO: codigo sin comillas que no empieza con letra
+    curso: "Curso Malo" [codigo: 9-0812, creditos: 5],
+  };
+  CATEDRATICOS {
+    ## CATEGORIA_NO_RECONOCIDA
+    catedratico: "Otto Rodriguez" [codigo: "DOC-001", categoria: TITULA],
+  };
+  AULAS {
+    ## CARACTER_NO_RECONOCIDO: el simbolo @ suelto
+    aula: "A-101" [capacidad: 40 @, edificio: "T-3"],
+  };
+  CLASES {
+    ## DIA_NO_RECONOCIDO y dos HORA_FUERA_DE_RANGO
+    clase: "LFP-0796" con "DOC-001" en "A-101" [dia: LUNEZ, inicio: 7:00, fin: 25:00, seccion: "N"],
+    ## PALABRA_NO_RECONOCIDA: atributo inexistente
+    clase: "LFP-0796" con "DOC-001" en "A-101" [dia: MARTES, inicio: 07:00, fin: 08:40, salon: 5],
+    ## CADENA_SIN_CERRAR
+    clase: "LFP-0796" con "DOC-001" en "A-101" [dia: JUEVES, inicio: 09:00, fin: 10:40, seccion: "sin cerrar
+  };
+};

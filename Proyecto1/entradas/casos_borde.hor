@@ -1,0 +1,17 @@
+## Casos borde: horas limite, bloques adyacentes y caracteres raros protegidos
+HORARIO {
+  CURSOS {
+    curso: "Simbolos @ % ~ dentro de cadena" [codigo: "LFP-0796", creditos: 4],
+  };
+  CATEDRATICOS {
+    catedratico: "Otto Rodriguez" [codigo: "DOC-001", categoria: TITULAR],
+  };
+  AULAS {
+    aula: "A-101" [capacidad: 40, edificio: "T-3"],
+  };
+  CLASES {
+    clase: "LFP-0796" con "DOC-001" en "A-101" [dia: LUNES, inicio: 06:00, fin: 07:40, seccion: "N"],
+    clase: "LFP-0796" con "DOC-001" en "A-101" [dia: LUNES, inicio: 07:40, fin: 09:20, seccion: "N"],
+    clase: "LFP-0796" con "DOC-001" en "A-101" [dia: MARTES, inicio: 19:20, fin: 21:00, seccion: "N"],
+  };
+};

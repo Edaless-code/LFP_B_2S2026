@@ -1,0 +1,25 @@
+## Horario con choques de horario simulados
+## DOC-001 duplicado el LUNES y aula A-101 duplicada el MARTES
+
+HORARIO {
+  CURSOS {
+    curso: "Lenguajes Formales y de Programacion" [codigo: "LFP-0796", creditos: 4],
+    curso: "Bases de Datos 2" [codigo: "BD2-0812", creditos: 5],
+    curso: "Sistemas Operativos 1" [codigo: "SO1-0770", creditos: 4],
+  };
+  CATEDRATICOS {
+    catedratico: "Otto Rodriguez" [codigo: "DOC-001", categoria: TITULAR],
+    catedratico: "Vivian Campos" [codigo: "DOC-002", categoria: INTERINO],
+  };
+  AULAS {
+    aula: "A-101" [capacidad: 40, edificio: "T-3"],
+    aula: "LAB-3" [capacidad: 25, edificio: "T-5"],
+  };
+  CLASES {
+    clase: "LFP-0796" con "DOC-001" en "A-101" [dia: LUNES, inicio: 07:00, fin: 08:40, seccion: "N"],
+    clase: "BD2-0812" con "DOC-001" en "LAB-3" [dia: LUNES, inicio: 08:00, fin: 09:40, seccion: "N"],
+    clase: "SO1-0770" con "DOC-001" en "A-101" [dia: MARTES, inicio: 10:00, fin: 12:00, seccion: "A"],
+    clase: "BD2-0812" con "DOC-002" en "A-101" [dia: MARTES, inicio: 11:00, fin: 13:00, seccion: "A"],
+    clase: "LFP-0796" con "DOC-002" en "LAB-3" [dia: VIERNES, inicio: 07:00, fin: 08:40, seccion: "N"],
+  };
+};
