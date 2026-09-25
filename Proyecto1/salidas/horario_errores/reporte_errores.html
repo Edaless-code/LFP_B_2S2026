@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reporte de Errores Lexicos</title>
+<style>
+:root {
+  --tinta: #1a1d21;
+  --tinta-suave: #5b6670;
+  --borde: #d8dde2;
+  --fondo: #f6f7f9;
+  --panel: #ffffff;
+  --ok-fondo: #e6f4ea; --ok-borde: #7cc496; --ok-texto: #1c6b3a;
+  --mal-fondo: #fdeaea; --mal-borde: #e08a8a; --mal-texto: #a12626;
+  --alerta-fondo: #fdf3e3; --alerta-borde: #e3b167; --alerta-texto: #8a5a12;
+  --info-fondo: #e8f0fb; --info-borde: #86aee3; --info-texto: #1d4d8f;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 32px 24px;
+  background: var(--fondo); color: var(--tinta);
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px; line-height: 1.5;
+}
+.contenedor { max-width: 1180px; margin: 0 auto; }
+header.principal {
+  background: var(--panel); border: 1px solid var(--borde);
+  border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;
+}
+header.principal h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
+header.principal p { margin: 0; color: var(--tinta-suave); font-size: 13px; }
+section { margin-bottom: 32px; }
+section > h2 {
+  font-size: 16px; font-weight: 600; margin: 0 0 12px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--borde);
+}
+table {
+  width: 100%; border-collapse: collapse; background: var(--panel);
+  border: 1px solid var(--borde); border-radius: 8px; overflow: hidden;
+}
+th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--borde); }
+th {
+  background: #eef1f4; font-weight: 600; font-size: 12px;
+  text-transform: uppercase; letter-spacing: .04em; color: var(--tinta-suave);
+}
+tbody tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.num, th.num { width: 1%; white-space: nowrap; }
+th.centro, td.centro { text-align: center; }
+.rejilla { table-layout: fixed; }
+.rejilla th.hora, .rejilla td.hora {
+  width: 110px; font-variant-numeric: tabular-nums;
+  background: #eef1f4; font-weight: 600; font-size: 12px;
+}
+.rejilla td { vertical-align: top; height: 72px; font-size: 12px; }
+.celda-ok { background: var(--ok-fondo); border-left: 3px solid var(--ok-borde); }
+.celda-choque { background: var(--mal-fondo); border-left: 3px solid var(--mal-borde); }
+.celda-vacia { background: #fbfcfd; }
+.celda .curso { font-weight: 600; display: block; }
+.celda .detalle { color: var(--tinta-suave); display: block; }
+.marca {
+  display: inline-block; margin-top: 4px; padding: 1px 6px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  background: var(--mal-texto); color: #fff;
+}
+.etiqueta {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; letter-spacing: .03em; border: 1px solid;
+}
+.et-baja     { background: var(--info-fondo);   border-color: var(--info-borde);   color: var(--info-texto); }
+.et-normal   { background: var(--ok-fondo);     border-color: var(--ok-borde);     color: var(--ok-texto); }
+.et-alta     { background: var(--alerta-fondo); border-color: var(--alerta-borde); color: var(--alerta-texto); }
+.et-saturada { background: var(--mal-fondo);    border-color: var(--mal-borde);    color: var(--mal-texto); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.kpi {
+  background: var(--panel); border: 1px solid var(--borde);
+  border-radius: 8px; padding: 14px 16px;
+}
+.kpi .valor { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.kpi .titulo {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--tinta-suave); margin-bottom: 2px;
+}
+.kpi.critico .valor { color: var(--mal-texto); }
+.barra { background: #e7ebef; border-radius: 4px; height: 16px; width: 100%; position: relative; }
+.barra > span { display: block; height: 100%; border-radius: 4px; background: var(--ok-borde); }
+.barra.alta > span { background: var(--mal-borde); }
+.barra-texto { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--tinta-suave); }
+tr.fila-critica td { background: var(--mal-fondo); }
+.vacio {
+  background: var(--panel); border: 1px dashed var(--borde); border-radius: 8px;
+  padding: 24px; text-align: center; color: var(--tinta-suave);
+}
+footer {
+  margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--borde);
+  color: var(--tinta-suave); font-size: 12px;
+}
+@media (max-width: 720px) {
+  body { padding: 16px; }
+  .rejilla th.hora, .rejilla td.hora { width: 76px; }
+}
+</style>
+</head>
+<body>
+<div class="contenedor">
+<header class="principal">
+<h1>Reporte de Errores Lexicos</h1>
+<p>8 errores encontrados durante el analisis</p>
+</header>
+<section><h2>Errores detectados</h2><table><thead><tr><th class="num">No.</th><th>Lexema</th><th>Tipo de error</th><th>Descripcion</th><th class="num">Linea</th><th class="num">Columna</th></tr></thead><tbody><tr><td class="num">1</td><td>9-0812</td><td>CODIGO_MAL_FORMADO</td><td>Codigo mal formado: '9-0812' en linea 9, columna 34</td><td class="num">9</td><td class="num">34</td></tr><tr><td class="num">2</td><td>TITULA</td><td>CATEGORIA_NO_RECONOCIDA</td><td>Categoria no reconocida: 'TITULA' en linea 13, columna 66</td><td class="num">13</td><td class="num">66</td></tr><tr><td class="num">3</td><td>@</td><td>CARACTER_NO_RECONOCIDO</td><td>Caracter no reconocido: '@' en linea 17, columna 34</td><td class="num">17</td><td class="num">34</td></tr><tr><td class="num">4</td><td>LUNEZ</td><td>DIA_NO_RECONOCIDO</td><td>Dia no reconocido: 'LUNEZ' en linea 21, columna 54</td><td class="num">21</td><td class="num">54</td></tr><tr><td class="num">5</td><td>7:00</td><td>HORA_FUERA_DE_RANGO</td><td>Hora fuera de rango: '7:00' en linea 21, columna 69</td><td class="num">21</td><td class="num">69</td></tr><tr><td class="num">6</td><td>25:00</td><td>HORA_FUERA_DE_RANGO</td><td>Hora fuera de rango: '25:00' en linea 21, columna 80</td><td class="num">21</td><td class="num">80</td></tr><tr><td class="num">7</td><td>salon</td><td>PALABRA_NO_RECONOCIDA</td><td>Palabra no reconocida: 'salon' en linea 23, columna 89</td><td class="num">23</td><td class="num">89</td></tr><tr><td class="num">8</td><td>&quot;sin cerrar</td><td>CADENA_SIN_CERRAR</td><td>Cadena sin cerrar iniciada en linea 25, columna 98</td><td class="num">25</td><td class="num">98</td></tr></tbody></table></section>
+<footer>
+HorarioScript - Analizador Lexico<br>
+Edgar Alessandro Chocon Oliva - 202212978 - Lenguajes Formales y de Programacion
+</footer>
+</div>
+</body>
+</html>

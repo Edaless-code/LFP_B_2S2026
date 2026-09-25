@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reporte 3 - Estadistico General del Ciclo</title>
+<style>
+:root {
+  --tinta: #1a1d21;
+  --tinta-suave: #5b6670;
+  --borde: #d8dde2;
+  --fondo: #f6f7f9;
+  --panel: #ffffff;
+  --ok-fondo: #e6f4ea; --ok-borde: #7cc496; --ok-texto: #1c6b3a;
+  --mal-fondo: #fdeaea; --mal-borde: #e08a8a; --mal-texto: #a12626;
+  --alerta-fondo: #fdf3e3; --alerta-borde: #e3b167; --alerta-texto: #8a5a12;
+  --info-fondo: #e8f0fb; --info-borde: #86aee3; --info-texto: #1d4d8f;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 32px 24px;
+  background: var(--fondo); color: var(--tinta);
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px; line-height: 1.5;
+}
+.contenedor { max-width: 1180px; margin: 0 auto; }
+header.principal {
+  background: var(--panel); border: 1px solid var(--borde);
+  border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;
+}
+header.principal h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
+header.principal p { margin: 0; color: var(--tinta-suave); font-size: 13px; }
+section { margin-bottom: 32px; }
+section > h2 {
+  font-size: 16px; font-weight: 600; margin: 0 0 12px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--borde);
+}
+table {
+  width: 100%; border-collapse: collapse; background: var(--panel);
+  border: 1px solid var(--borde); border-radius: 8px; overflow: hidden;
+}
+th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--borde); }
+th {
+  background: #eef1f4; font-weight: 600; font-size: 12px;
+  text-transform: uppercase; letter-spacing: .04em; color: var(--tinta-suave);
+}
+tbody tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.num, th.num { width: 1%; white-space: nowrap; }
+th.centro, td.centro { text-align: center; }
+.rejilla { table-layout: fixed; }
+.rejilla th.hora, .rejilla td.hora {
+  width: 110px; font-variant-numeric: tabular-nums;
+  background: #eef1f4; font-weight: 600; font-size: 12px;
+}
+.rejilla td { vertical-align: top; height: 72px; font-size: 12px; }
+.celda-ok { background: var(--ok-fondo); border-left: 3px solid var(--ok-borde); }
+.celda-choque { background: var(--mal-fondo); border-left: 3px solid var(--mal-borde); }
+.celda-vacia { background: #fbfcfd; }
+.celda .curso { font-weight: 600; display: block; }
+.celda .detalle { color: var(--tinta-suave); display: block; }
+.marca {
+  display: inline-block; margin-top: 4px; padding: 1px 6px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  background: var(--mal-texto); color: #fff;
+}
+.etiqueta {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; letter-spacing: .03em; border: 1px solid;
+}
+.et-baja     { background: var(--info-fondo);   border-color: var(--info-borde);   color: var(--info-texto); }
+.et-normal   { background: var(--ok-fondo);     border-color: var(--ok-borde);     color: var(--ok-texto); }
+.et-alta     { background: var(--alerta-fondo); border-color: var(--alerta-borde); color: var(--alerta-texto); }
+.et-saturada { background: var(--mal-fondo);    border-color: var(--mal-borde);    color: var(--mal-texto); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.kpi {
+  background: var(--panel); border: 1px solid var(--borde);
+  border-radius: 8px; padding: 14px 16px;
+}
+.kpi .valor { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.kpi .titulo {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--tinta-suave); margin-bottom: 2px;
+}
+.kpi.critico .valor { color: var(--mal-texto); }
+.barra { background: #e7ebef; border-radius: 4px; height: 16px; width: 100%; position: relative; }
+.barra > span { display: block; height: 100%; border-radius: 4px; background: var(--ok-borde); }
+.barra.alta > span { background: var(--mal-borde); }
+.barra-texto { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--tinta-suave); }
+tr.fila-critica td { background: var(--mal-fondo); }
+.vacio {
+  background: var(--panel); border: 1px dashed var(--borde); border-radius: 8px;
+  padding: 24px; text-align: center; color: var(--tinta-suave);
+}
+footer {
+  margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--borde);
+  color: var(--tinta-suave); font-size: 12px;
+}
+@media (max-width: 720px) {
+  body { padding: 16px; }
+  .rejilla th.hora, .rejilla td.hora { width: 76px; }
+}
+</style>
+</head>
+<body>
+<div class="contenedor">
+<header class="principal">
+<h1>Reporte 3 - Estadistico General del Ciclo</h1>
+<p>5 clases analizadas</p>
+</header>
+<section><h2>Indicadores generales</h2><div class="kpis"><div class="kpi"><div class="titulo">Cursos</div><div class="valor">3</div></div><div class="kpi"><div class="titulo">Catedraticos</div><div class="valor">2</div></div><div class="kpi"><div class="titulo">Aulas</div><div class="valor">2</div></div><div class="kpi"><div class="titulo">Clases programadas</div><div class="valor">5</div></div><div class="kpi critico"><div class="titulo">Choques de horario</div><div class="valor">2</div></div><div class="kpi"><div class="titulo">Promedio h/catedratico</div><div class="valor">4.50</div></div></div></section><section><h2>Destacados</h2><div class="kpis"><div class="kpi"><div class="titulo">Catedratico con mayor carga</div><div class="valor">Otto Rodriguez (5.3 h)</div></div><div class="kpi"><div class="titulo">Aula con mayor ocupacion</div><div class="valor">A-101 (6.3%)</div></div></div></section><section><h2>Ocupacion de aulas</h2><table><thead><tr><th>Aula</th><th>Edificio</th><th class="num">Capacidad</th><th class="num">Clases</th><th class="num">Horas semanales</th><th>Ocupacion</th></tr></thead><tbody><tr><td>A-101</td><td>T-3</td><td class="num">40</td><td class="num">3</td><td class="num">5.67</td><td><div class="barra"><span style="width:6.3%"></span></div><span class="barra-texto">6.3%</span></td></tr><tr><td>LAB-3</td><td>T-5</td><td class="num">25</td><td class="num">2</td><td class="num">3.33</td><td><div class="barra"><span style="width:3.7%"></span></div><span class="barra-texto">3.7%</span></td></tr></tbody></table><p class="barra-texto">La ocupacion se calcula sobre 6 dias de 15 horas (jornada 06:00-21:00). Se resaltan las aulas por encima del 80%.</p></section>
+<footer>
+HorarioScript - Analizador Lexico<br>
+Edgar Alessandro Chocon Oliva - 202212978 - Lenguajes Formales y de Programacion
+</footer>
+</div>
+</body>
+</html>
