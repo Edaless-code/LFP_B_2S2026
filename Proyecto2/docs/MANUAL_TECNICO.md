@@ -244,6 +244,11 @@ exactamente 2 espacios la hace el parser (seccion 5.2), porque el enunciado
 clasifica INDENTACION_INVALIDA como error sintactico. Por eso el lexico emite
 un solo INDENT aunque el salto sea de 0 a 4 espacios.
 
+Para esa validacion, cada token VIÑETA guarda en su atributo `sangria` el
+ancho de la indentacion que lo precede. Se usa la sangria y no la columna
+porque una tabulacion ocupa una sola columna en la posicion reportada, pero
+equivale a 2 espacios de indentacion.
+
 Ejemplo con la lista de `examples/ejemplo_valido.md`:
 
 ```
@@ -472,7 +477,7 @@ sin errores, como indica la seccion 4.8 del enunciado.
 
 | Error | Deteccion | Recuperacion |
 |---|---|---|
-| INDENTACION_INVALIDA | En `<sublista>`, la columna de la primera VIÑETA no es la del item padre mas 2; o en `<lista>`, una VIÑETA no esta en la misma columna que el primer item de esa lista | Se reporta en la posicion de la VIÑETA y el item se acepta en el nivel donde quedo; no se descarta contenido |
+| INDENTACION_INVALIDA | En `<sublista>`, la sangria de la primera VIÑETA no es la del item padre mas 2; o en `<lista>`, una VIÑETA no tiene la misma sangria que el primer item de esa lista | Se reporta en la posicion de la VIÑETA y el item se acepta en el nivel donde quedo; no se descarta contenido |
 | CITA_MAL_FORMADA | En `<linea_cita>`, el token que sigue a CITA comienza en la columna inmediata siguiente al `>` (falta el espacio) | Se reporta y la linea se acepta como cita |
 | TOKEN_INESPERADO | Un token que no pertenece a PRIMERO de la produccion esperada | Modo panico: se descartan tokens hasta un token de sincronizacion (SALTO_LINEA, que se consume, SALTO_PARRAFO o FIN_ARCHIVO) y se reanuda en `<documento>` |
 

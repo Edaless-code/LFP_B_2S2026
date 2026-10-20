@@ -62,6 +62,15 @@ python main.py
 
 En Windows puede usarse `py main.py`.
 
+## Pruebas
+
+Las pruebas unitarias usan `unittest`, de la biblioteca estandar:
+
+```bash
+cd Proyecto2
+python -m unittest discover -s tests -v
+```
+
 ## Estructura del proyecto
 
 ```
@@ -89,6 +98,6 @@ Proyecto2/
 | Fase | Contenido | Estado |
 |---|---|---|
 | 1 | Estructura, modelos base, gramatica y AFD | Completada |
-| 2 | Analizador lexico (AFD) | Pendiente |
+| 2 | Analizador lexico (AFD) y gestor de errores | Completada |
 | 3 | Parser descendente recursivo e interfaz grafica | Pendiente |
 | 4 | Reportes, pruebas y documentacion | Pendiente |
