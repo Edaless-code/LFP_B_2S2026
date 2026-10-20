@@ -1,0 +1,59 @@
+// Diagrama de clases de MarkdownCheck.
+// Generar la imagen con:  dot -Tpng clases.dot -o clases.png
+digraph Clases {
+    rankdir=TB;
+    nodesep=0.4;
+    ranksep=0.6;
+    fontname="Arial";
+    node [shape=record, fontname="Arial", fontsize=9, style=filled, fillcolor="#FFFFFF", color="#5D6D7E"];
+    edge [fontname="Arial", fontsize=8, color="#5D6D7E"];
+
+    subgraph cluster_interfaz {
+        label="interfaz / servicios"; style="rounded,filled"; fillcolor="#F4F8FC"; color="#2E75B6"; fontsize=10;
+        VentanaPrincipal [label="{VentanaPrincipal|- _ruta: str\l- _tokens: list[Token]\l- _errores: list[ErrorAnalisis]\l- _raiz: NodoAST\l- _salidas: SalidasGeneradas\l|+ abrir_ruta(ruta)\l- _analizar()\l- _generar_salidas()\l- _mostrar_tokens()\l- _mostrar_errores()\l- _mostrar_arbol()\l}"];
+        EditorCodigo [label="{EditorCodigo|- _lineas_error: set[int]\l|+ marcar_lineas_error(lineas)\l+ ir_a(linea, columna)\l+ posicion_cursor()\l}"];
+        CargadorArchivos [label="{CargadorArchivos|+ cargar(ruta): str\l+ guardar(ruta, texto)\l}"];
+    }
+
+    subgraph cluster_analizador {
+        label="analizador"; style="rounded,filled"; fillcolor="#F6FBF4"; color="#3A8E3A"; fontsize=10;
+        AnalizadorLexico [label="{AnalizadorLexico|- _lineas: list[str]\l- _pendientes: deque[Token]\l- _pila_sangrias: list[int]\l|+ siguiente_token(): Token\l+ analizar_todo(): list[Token]\l- _analizar_inicio(linea)\l- _tokenizar_en_linea(segmentos)\l- _actualizar_sangria(...)\l}"];
+        AnalizadorSintactico [label="{AnalizadorSintactico|- _actual: Token\l|+ analizar(): NodoAST\l+ documento() / bloque()\l+ encabezado() / parrafo()\l+ lista() / item_lista() / sublista()\l+ cita(nivel) / linea_cita()\l+ bloque_codigo() / regla_horizontal()\l+ en_linea(abiertos)\l+ negrita() / cursiva() / codigo_inline()\l}"];
+        GestorErrores [label="{GestorErrores|- _errores: list[ErrorAnalisis]\l|+ registrar(tipo, lexema, linea, columna)\l+ contiene(tipo, linea): bool\l+ ordenar_por_posicion()\l}"];
+    }
+
+    subgraph cluster_reportes {
+        label="reportes"; style="rounded,filled"; fillcolor="#FDF6EC"; color="#B9770E"; fontsize=10;
+        GeneradorReportes [label="{GeneradorReportes|+ generar(raiz, nombre): SalidasGeneradas\l+ generar_errores(errores, nombre)\l}"];
+        GeneradorHTML [label="{GeneradorHTML|+ encabezados: list[Encabezado]\l|+ generar_cuerpo(): str\l+ generar_reporte(nombre): str\l}"];
+        Estadisticas [label="{Estadisticas|palabras, parrafos, encabezados_por_nivel\lprofundidad_listas, profundidad_citas, ...\l}"];
+        Funciones [label="{funciones|calcular_estadisticas(raiz)\lgenerar_reporte_estadisticas(...)\lgenerar_reporte_indice(...)\lgenerar_dot(raiz)\l}"];
+    }
+
+    subgraph cluster_modelos {
+        label="modelos"; style="rounded,filled"; fillcolor="#FBF1F8"; color="#8E44AD"; fontsize=10;
+        Token [label="{Token|+ numero: int\l+ lexema: str\l+ tipo: TipoToken\l+ linea: int\l+ columna: int\l+ sangria: int\l|+ a_fila(): tuple\l}"];
+        TipoToken [label="{«enum» TipoToken|NUMERAL, VIÑETA, INDENT, DEDENT,\lCITA, CERCA_CODIGO, NEGRITA, ...\l}"];
+        NodoAST [label="{NodoAST|+ simbolo: str\l+ token: Token \| None\l+ hijos: list[NodoAST]\l|+ agregar_hijo(hijo)\l+ es_terminal: bool\l}"];
+        ErrorAnalisis [label="{ErrorAnalisis|+ numero, lexema, tipo\l+ linea, columna, descripcion\l|+ fase: Fase\l+ a_fila(): tuple\l}"];
+        TipoError [label="{«enum» TipoError|NEGRITA_SIN_CERRAR, ...\lINDENTACION_INVALIDA, ...\l}"];
+    }
+
+    VentanaPrincipal -> EditorCodigo [dir=back, arrowtail=diamond, label="contiene"];
+    VentanaPrincipal -> CargadorArchivos [style=dashed, arrowhead=vee, label="usa"];
+    VentanaPrincipal -> AnalizadorSintactico [style=dashed, arrowhead=vee, label="crea"];
+    VentanaPrincipal -> GeneradorReportes [style=dashed, arrowhead=vee, label="usa"];
+    AnalizadorSintactico -> AnalizadorLexico [arrowhead=vee, label="siguiente_token()"];
+    AnalizadorSintactico -> GestorErrores [arrowhead=vee];
+    AnalizadorLexico -> GestorErrores [arrowhead=vee];
+    AnalizadorSintactico -> NodoAST [style=dashed, arrowhead=vee, label="construye"];
+    AnalizadorLexico -> Token [style=dashed, arrowhead=vee, label="produce"];
+    GestorErrores -> ErrorAnalisis [dir=back, arrowtail=diamond];
+    GeneradorReportes -> GeneradorHTML [style=dashed, arrowhead=vee];
+    GeneradorReportes -> Funciones [style=dashed, arrowhead=vee];
+    Funciones -> Estadisticas [style=dashed, arrowhead=vee];
+    NodoAST -> NodoAST [dir=back, arrowtail=diamond, label="hijos"];
+    NodoAST -> Token [arrowhead=vee];
+    Token -> TipoToken [arrowhead=vee];
+    ErrorAnalisis -> TipoError [arrowhead=vee];
+}

@@ -1,9 +1,9 @@
 # Manual Tecnico - MarkdownCheck
 
-**Autor:** Edgar Alessandro Chocon Oliva
-**Carnet:** 202212978
-**Curso:** Lenguajes Formales y de Programacion - Seccion B+
-**Universidad de San Carlos de Guatemala - Facultad de Ingenieria**
+**Autor:** Edgar Alessandro Chocon Oliva\
+**Carnet:** 202212978\
+**Curso:** Lenguajes Formales y de Programacion - Seccion B+\
+**Universidad de San Carlos de Guatemala - Facultad de Ingenieria**\
 **Segundo Semestre 2026**
 
 ---
@@ -19,9 +19,10 @@ por debajo, nunca al reves.
   interfaz        VentanaPrincipal, EditorCodigo, tema (PyQt6)
       |
       v
-  servicios       CargadorArchivos            reportes   GeneradorHTML, estadisticas, indice, DOT
-      |                                           |
-      v                                           v
+  reportes        GeneradorReportes, GeneradorHTML, estadisticas, indice, DOT
+  servicios       CargadorArchivos
+      |
+      v
   analizador      AnalizadorLexico, AnalizadorSintactico, GestorErrores
       |
       v
@@ -68,6 +69,18 @@ el analisis sintactico.
 el `AnalizadorLexico` y el `AnalizadorSintactico`, ejecuta `analizar()` y
 muestra lo que devuelven. Cualquier excepcion inesperada se informa en un
 cuadro de dialogo para que la aplicacion no se cierre.
+
+### 1.4 Diagrama de clases
+
+![Diagrama de clases](imagenes/clases.svg)
+
+Fuente del diagrama: `docs/imagenes/clases.dot`.
+
+Las flechas punteadas indican que una clase crea o usa a otra; las continuas,
+que guarda una referencia; el rombo indica composicion (el contenedor es
+dueno de sus partes). Las dependencias van siempre de las capas superiores a
+las inferiores: ninguna clase de `modelos` o de `analizador` importa algo de
+`interfaz` o de `reportes`.
 
 ---
 
@@ -141,7 +154,7 @@ Tokens de apoyo agregados a la seccion 4.5 del enunciado:
 
 ### 3.1 Diagrama
 
-![AFD del analizador lexico](imagenes/afd.png)
+![AFD del analizador lexico](imagenes/afd.svg)
 
 Fuente del diagrama: `docs/imagenes/afd.dot`.
 
@@ -476,7 +489,9 @@ devuelve el `NodoAST` de esa produccion:
 El analisis nunca se detiene ante un error. Todos los errores se acumulan en
 `GestorErrores` y se muestran al final, tanto en la interfaz como en la tabla
 de errores. Los tres reportes HTML se generan solo cuando el analisis termina
-sin errores, como indica la seccion 4.8 del enunciado.
+sin errores, como indica la seccion 4.8 del enunciado; cuando hay errores se
+genera en su lugar `reporte_errores.html` con la misma tabla que muestra la
+interfaz.
 
 ### 5.1 Errores lexicos
 
@@ -502,7 +517,126 @@ lexico ya registro BLOQUE_CODIGO_SIN_CERRAR para esa misma causa.
 
 ---
 
-## 6. Decisiones de Diseno
+## 6. Arbol de Derivacion
+
+### 6.1 Estructura
+
+El parser construye un `NodoAST` por cada produccion que aplica. Los nodos no
+terminales guardan el simbolo (`<parrafo>`, `<item_lista>`, etc.) y sus hijos
+en orden; las hojas guardan el token reconocido. Todos los tokens que entrega
+el analizador lexico terminan como hojas del arbol, y una prueba automatizada
+lo verifica para el archivo de ejemplo.
+
+### 6.2 Archivo arbol.dot
+
+`generar_dot()` recorre el arbol en preorden y asigna a cada nodo un
+identificador `n0`, `n1`, ... Por cada nodo escribe una linea con su etiqueta y
+su color, y por cada relacion padre-hijo una arista. Los colores son los de la
+seccion 4.10 del enunciado:
+
+| Nodo | Color |
+|---|---|
+| Raiz `<documento>` | Azul oscuro `#2E75B6` con texto blanco |
+| No terminales | Azul claro `#D6EAF8` |
+| Terminales | Amarillo `#F9E79F`, con el tipo de token y el lexema |
+
+Los lexemas de mas de 28 caracteres se recortan para que el diagrama sea
+legible. Si Graphviz esta instalado, el sistema tambien genera `arbol.svg`.
+
+### 6.3 Ejemplo: caso de prueba 12
+
+Entrada (`examples/caso12_sin_encabezados.md`):
+
+```markdown
+Este documento no tiene encabezados.
+
+- Solo una lista
+- Con dos elementos
+
+> Y una cita.
+```
+
+Arbol de derivacion generado (`salidas/caso12_sin_encabezados/arbol.dot`):
+
+![Arbol de derivacion del caso 12](imagenes/arbol_caso12.png)
+
+El arbol completo del ejemplo del enunciado esta en
+`docs/imagenes/arbol_ejemplo_valido.png` y su fuente en
+`salidas/ejemplo_valido/arbol.dot`.
+
+---
+
+## 7. Generacion de Reportes
+
+Todos los reportes se generan recorriendo el arbol de derivacion, nunca el
+texto original ni con expresiones regulares. Se guardan en
+`salidas/<nombre del archivo>/` como paginas HTML independientes con el CSS
+embebido.
+
+### 7.1 Reporte 1: documento HTML
+
+`GeneradorHTML` asocia cada no terminal con un metodo que produce su fragmento
+HTML a partir de los fragmentos de sus hijos:
+
+| Nodo | HTML |
+|---|---|
+| `<encabezado>` | `<hN id="ancla">...</hN>`, con N = cantidad de `#` del token NUMERAL |
+| `<parrafo>` | `<p>...</p>` |
+| `<lista>` | `<ul>...</ul>` |
+| `<item_lista>` | `<li>contenido` + sublista + `</li>` |
+| `<cita>` | `<blockquote>...</blockquote>` (anidado igual que en el arbol) |
+| `<linea_cita>` | `<p>...</p>` |
+| `<bloque_codigo>` | `<pre><code class="language-x">...</code></pre>` |
+| `<regla_horizontal>` | `<hr>` |
+| `<negrita>`, `<cursiva>` | `<strong>`, `<em>` |
+| `<codigo_inline>` | `<code>...</code>` |
+| Hoja TEXTO | Texto con `&`, `<` y `>` escapados |
+
+Como la traduccion es recursiva, las combinaciones (cursiva dentro de negrita,
+negrita dentro de un item de una sublista, etc.) se producen sin reglas
+especiales.
+
+### 7.2 Reporte 2: estadisticas
+
+`calcular_estadisticas()` recorre el arbol una sola vez, llevando como
+parametros la profundidad actual de listas y de citas. Las palabras se cuentan
+en las hojas TEXTO; el contenido de codigo no se cuenta. Con esta regla el
+archivo de ejemplo da exactamente los valores que muestra el enunciado
+(67 palabras, 2 parrafos, 8 items, etc.).
+
+### 7.3 Reporte 3: tabla de contenido
+
+`extraer_encabezados()` obtiene los encabezados en preorden y les asigna un
+ancla unica a partir de su texto (minusculas, letras y digitos, guiones en
+lugar de espacios y un sufijo `-2`, `-3` si se repite). El Reporte 1 usa la
+misma lista para los atributos `id`, por lo que cada enlace
+`reporte1_documento.html#ancla` del indice lleva a su seccion. Si el documento
+no tiene encabezados, el reporte lo indica con un mensaje.
+
+### 7.4 Vista previa en la interfaz
+
+La pestana Vista previa muestra el mismo HTML del Reporte 1 en un
+`QTextBrowser`, sin salir de la aplicacion.
+
+---
+
+## 8. Pruebas
+
+La carpeta `tests/` contiene 97 pruebas unitarias con `unittest`:
+
+| Archivo | Pruebas | Cobertura |
+|---|---|---|
+| `test_lexico.py` | 44 | Tokens y posiciones del ejemplo, reglas de prioridad, INDENT/DEDENT, errores lexicos y casos borde |
+| `test_sintactico.py` | 28 | Estructura del arbol, anidamiento de listas, citas y enfasis, errores sintacticos y analisis en una sola pasada |
+| `test_reportes.py` | 19 | HTML del Reporte 1, anclas, estadisticas del ejemplo, indice, archivo DOT y escritura de archivos |
+| `test_cargador.py` | 6 | Validacion y lectura de archivos |
+
+Los casos de prueba de extremo a extremo, con entrada, resultado esperado y
+resultado obtenido, estan en `docs/CASOS_PRUEBA.md`.
+
+---
+
+## 9. Decisiones de Diseno
 
 | Decision | Justificacion |
 |---|---|
@@ -512,3 +646,6 @@ lexico ya registro BLOQUE_CODIGO_SIN_CERRAR para esa misma causa.
 | Una linea sin vineta termina la lista | El subconjunto no incluye las lineas de continuacion de items; asi cada item ocupa exactamente una linea |
 | Las lineas en blanco forman el bloque `<separador>` | Aparecen en el arbol de derivacion tal como estan en el documento, y el parrafo puede terminar sin ellas |
 | El analizador lexico tokeniza por bloques | Permite reportar los delimitadores sin cerrar en su posicion de apertura y entregar al parser una secuencia bien formada |
+| Los reportes 1, 2 y 3 solo se generan sin errores | Lo exige la seccion 4.8; con errores se genera el reporte de errores y se eliminan los reportes anteriores de ese archivo para no mostrar resultados que no corresponden |
+| Un solo generador de anclas para los reportes 1 y 3 | Garantiza que cada enlace del indice apunte a un id que existe |
+| Conversion a SVG opcional | El enunciado solo exige `arbol.dot`; si Graphviz esta instalado, la imagen se genera para abrirla desde la interfaz |
