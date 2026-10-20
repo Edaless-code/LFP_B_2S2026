@@ -10,7 +10,7 @@ digraph Clases {
 
     subgraph cluster_interfaz {
         label="interfaz / servicios"; style="rounded,filled"; fillcolor="#F4F8FC"; color="#2E75B6"; fontsize=10;
-        VentanaPrincipal [label="{VentanaPrincipal|- _ruta: str\l- _tokens: list[Token]\l- _errores: list[ErrorAnalisis]\l- _raiz: NodoAST\l- _salidas: SalidasGeneradas\l|+ abrir_ruta(ruta)\l- _analizar()\l- _generar_salidas()\l- _mostrar_tokens()\l- _mostrar_errores()\l- _mostrar_arbol()\l}"];
+        VentanaPrincipal [label="{VentanaPrincipal|- _ruta: str\l- _tokens: list[Token]\l- _errores: list[ErrorAnalisis]\l- _raiz: NodoAST\l- _salidas: SalidasGeneradas\l- _temporizador_vivo: QTimer\l|+ abrir_ruta(ruta)\l- _analizar()\l- _generar_salidas()\l- _mostrar_tokens()\l- _mostrar_errores()\l- _mostrar_arbol()\l}"];
         EditorCodigo [label="{EditorCodigo|- _lineas_error: set[int]\l|+ marcar_lineas_error(lineas)\l+ ir_a(linea, columna)\l+ posicion_cursor()\l}"];
         CargadorArchivos [label="{CargadorArchivos|+ cargar(ruta): str\l+ guardar(ruta, texto)\l}"];
     }
@@ -18,7 +18,8 @@ digraph Clases {
     subgraph cluster_analizador {
         label="analizador"; style="rounded,filled"; fillcolor="#F6FBF4"; color="#3A8E3A"; fontsize=10;
         AnalizadorLexico [label="{AnalizadorLexico|- _lineas: list[str]\l- _pendientes: deque[Token]\l- _pila_sangrias: list[int]\l|+ siguiente_token(): Token\l+ analizar_todo(): list[Token]\l- _analizar_inicio(linea)\l- _tokenizar_en_linea(segmentos)\l- _actualizar_sangria(...)\l}"];
-        AnalizadorSintactico [label="{AnalizadorSintactico|- _actual: Token\l|+ analizar(): NodoAST\l+ documento() / bloque()\l+ encabezado() / parrafo()\l+ lista() / item_lista() / sublista()\l+ cita(nivel) / linea_cita()\l+ bloque_codigo() / regla_horizontal()\l+ en_linea(abiertos)\l+ negrita() / cursiva() / codigo_inline()\l}"];
+        AnalizadorSintactico [label="{AnalizadorSintactico|- _actual: Token\l|+ analizar(): NodoAST\l+ documento() / bloque()\l+ encabezado() / parrafo()\l+ lista() / item_lista() / sublista()\l+ cita(nivel) / linea_cita()\l+ bloque_codigo() / regla_horizontal()\l+ en_linea(abiertos)\l+ negrita() / cursiva() / tachado()\l+ codigo_inline() / enlace() / imagen()\l}"];
+        Advertencias [label="{funcion|buscar_anidamiento_excesivo(raiz, maximo)\l: list[AdvertenciaAnidamiento]\l}"];
         GestorErrores [label="{GestorErrores|- _errores: list[ErrorAnalisis]\l|+ registrar(tipo, lexema, linea, columna)\l+ contiene(tipo, linea): bool\l+ ordenar_por_posicion()\l}"];
     }
 
@@ -43,6 +44,7 @@ digraph Clases {
     VentanaPrincipal -> CargadorArchivos [style=dashed, arrowhead=vee, label="usa"];
     VentanaPrincipal -> AnalizadorSintactico [style=dashed, arrowhead=vee, label="crea"];
     VentanaPrincipal -> GeneradorReportes [style=dashed, arrowhead=vee, label="usa"];
+    VentanaPrincipal -> Advertencias [style=dashed, arrowhead=vee, label="usa"];
     AnalizadorSintactico -> AnalizadorLexico [arrowhead=vee, label="siguiente_token()"];
     AnalizadorSintactico -> GestorErrores [arrowhead=vee];
     AnalizadorLexico -> GestorErrores [arrowhead=vee];

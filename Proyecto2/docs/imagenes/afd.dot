@@ -53,6 +53,21 @@ digraph AFD {
         MS  [label="MS"];
         VI  [label="VIÑETA", shape=doublecircle, fillcolor="#F9E79F"];
         TX  [label="T\nTEXTO\n(conector)", shape=doublecircle, style="filled,dashed", fillcolor="#FCF3CF"];
+
+        // Alcance opcional: lista ordenada
+        D1  [label="D1\nDIGITOS"];
+        D2  [label="D2"];
+        EN  [label="ENUMERADOR", shape=doublecircle, fillcolor="#F9E79F"];
+    }
+
+    subgraph cluster_casilla {
+        label="Contexto: casilla de tarea (despues de VIÑETA o ENUMERADOR)";
+        style="rounded,filled"; fillcolor="#F2F7F7"; color="#17A589"; fontsize=11;
+
+        X0  [label="X0", fillcolor="#D1F2EB"];
+        X1  [label="X1"];
+        X2  [label="X2"];
+        X3  [label="CASILLA", shape=doublecircle, fillcolor="#F9E79F"];
     }
 
     subgraph cluster_linea {
@@ -65,6 +80,16 @@ digraph AFD {
         N2  [label="N2\nNEGRITA", shape=doublecircle, fillcolor="#F9E79F"];
         K1  [label="K1\nCODIGO_INLINE", shape=doublecircle, fillcolor="#F9E79F"];
         SL  [label="SL\nSALTO_LINEA", shape=doublecircle, fillcolor="#F9E79F"];
+
+        // Alcance opcional: tachado, enlaces e imagenes
+        V1  [label="V1"];
+        V2  [label="V2\nTACHADO", shape=doublecircle, fillcolor="#F9E79F"];
+        P1  [label="P1\nCORCHETE_ABRE", shape=doublecircle, fillcolor="#F9E79F"];
+        M1  [label="M1"];
+        M2  [label="M2\nIMAGEN_ABRE", shape=doublecircle, fillcolor="#F9E79F"];
+        P2  [label="P2\nCORCHETE_CIERRA", shape=doublecircle, fillcolor="#F9E79F"];
+        U1  [label="U1\nDESTINO"];
+        U2  [label="U2\nURL", shape=doublecircle, fillcolor="#F9E79F"];
     }
 
     subgraph cluster_literal_linea {
@@ -142,6 +167,21 @@ digraph AFD {
     MS -> VI  [label="esp"];
     MS -> TX  [label="otro"];
 
+    // Lista ordenada: digitos, punto y espacio
+    S0 -> D1  [label="digito"];
+    D1 -> D1  [label="digito"];
+    D1 -> D2  [label="."];
+    D2 -> EN  [label="esp"];
+    D1 -> TX  [label="otro"];
+    D2 -> TX  [label="otro"];
+
+    // Casilla de tarea: [ ], [x] o [X] seguida de espacio o fin de linea
+    entrada_casilla [shape=point, width=0.12];
+    entrada_casilla -> X0 [label="tras VIÑETA\no ENUMERADOR"];
+    X0 -> X1  [label="["];
+    X1 -> X2  [label="esp, x, X"];
+    X2 -> X3  [label="] (y luego esp o \\n)"];
+
     // ---------------- Contenido en linea ----------------
     E0 -> I1  [label="*"];
     I1 -> N2  [label="*"];
@@ -149,6 +189,16 @@ digraph AFD {
     E0 -> SL  [label="\\n (fin de bloque)"];
     E0 -> T   [label="otro"];
     T  -> T   [label="otro\n\\n (continua parrafo)"];
+    E0 -> V1  [label="~"];
+    V1 -> V2  [label="~"];
+    V1 -> T   [label="otro"];
+    E0 -> P1  [label="[ (patron\ncompleto)"];
+    E0 -> M1  [label="! (patron\ncompleto)"];
+    M1 -> M2  [label="["];
+    E0 -> P2  [label="] (fin del texto\ndel enlace)"];
+    P2 -> U1  [label="("];
+    U1 -> U1  [label="otro\n(sin esp)"];
+    U1 -> U2  [label=")"];
 
     // ---------------- Literal de codigo en linea ----------------
     LI -> LI  [label="otro"];
