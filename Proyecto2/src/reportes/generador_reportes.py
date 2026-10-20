@@ -60,11 +60,20 @@ class GeneradorReportes:
         base = os.path.splitext(os.path.basename(nombre_archivo))[0] or "sin_titulo"
         return os.path.join(self._directorio_salidas, base)
 
-    def generar(self, raiz: NodoAST, nombre_archivo: str) -> SalidasGeneradas:
+    def generar(
+        self, raiz: NodoAST, nombre_archivo: str, directorio_documento: str | None = None
+    ) -> SalidasGeneradas:
         """Genera los tres reportes HTML y arbol.dot de un analisis sin errores.
 
         Si Graphviz esta instalado tambien convierte el arbol a SVG; si no lo
         esta, solo se genera el archivo .dot.
+
+        Args:
+            raiz: Raiz del arbol de derivacion.
+            nombre_archivo: Nombre del archivo .md analizado.
+            directorio_documento: Carpeta del archivo .md, para ajustar las
+                rutas relativas de imagenes y enlaces. None si el documento
+                no se ha guardado.
 
         Raises:
             OSError: Si no se puede crear la carpeta o escribir un archivo.
@@ -72,7 +81,10 @@ class GeneradorReportes:
         salidas = SalidasGeneradas(self.directorio_para(nombre_archivo))
         os.makedirs(salidas.directorio, exist_ok=True)
 
-        generador_html = GeneradorHTML(raiz)
+        prefijo = ""
+        if directorio_documento is not None:
+            prefijo = os.path.relpath(directorio_documento, salidas.directorio).replace(os.sep, "/")
+        generador_html = GeneradorHTML(raiz, prefijo)
         salidas.documento = self._escribir(
             salidas.directorio, ARCHIVO_DOCUMENTO, generador_html.generar_reporte(nombre_archivo)
         )

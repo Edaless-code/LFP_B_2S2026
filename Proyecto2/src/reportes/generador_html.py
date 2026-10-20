@@ -97,8 +97,16 @@ def extraer_encabezados(raiz: NodoAST) -> list[Encabezado]:
 class GeneradorHTML:
     """Recorre el arbol de derivacion y produce el HTML equivalente."""
 
-    def __init__(self, raiz: NodoAST) -> None:
+    def __init__(self, raiz: NodoAST, prefijo_rutas: str = "") -> None:
+        """
+        Args:
+            raiz: Raiz <documento> del arbol de derivacion.
+            prefijo_rutas: Ruta desde la carpeta del reporte hasta la carpeta
+                del archivo .md. Se antepone a las rutas relativas de enlaces e
+                imagenes, que en Markdown son relativas al documento.
+        """
         self._raiz = raiz
+        self._prefijo_rutas = prefijo_rutas
         self.encabezados = extraer_encabezados(raiz)
         self._siguiente_encabezado = 0
         self._traducciones = {
@@ -264,13 +272,22 @@ class GeneradorHTML:
     def _codigo_inline(nodo: NodoAST) -> str:
         return f"<code>{texto_html(texto_plano(nodo))}</code>"
 
-    @staticmethod
-    def _destino(nodo: NodoAST) -> str:
-        """Destino de un enlace o imagen: el lexema de URL sin los parentesis."""
+    def _destino(self, nodo: NodoAST) -> str:
+        """Destino de un enlace o imagen: el lexema de URL sin los parentesis.
+
+        Las rutas relativas se ajustan con el prefijo para que sigan
+        apuntando al mismo archivo desde la carpeta del reporte. Las
+        direcciones con esquema (https:, mailto:), absolutas o anclas (#) no
+        se modifican.
+        """
+        destino = ""
         for hijo in nodo.hijos:
             if hijo.es_terminal and hijo.token.tipo == TipoToken.URL:
-                return hijo.lexema[1:-1]
-        return ""
+                destino = hijo.lexema[1:-1]
+        es_relativa = ":" not in destino and not destino.startswith(("/", "#"))
+        if self._prefijo_rutas and es_relativa:
+            return f"{self._prefijo_rutas}/{destino}"
+        return destino
 
     def _enlace(self, nodo: NodoAST) -> str:
         texto = self._traducir(self._hijo(nodo, "<en_linea>"))

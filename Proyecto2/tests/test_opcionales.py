@@ -154,6 +154,14 @@ class PruebasEnlacesEImagenes(unittest.TestCase):
         _, errores = analizar("*[a*](u)\n")
         self.assertEqual([e.tipo for e in errores], [TipoError.CURSIVA_SIN_CERRAR] * 2)
 
+    def test_rutas_relativas_se_ajustan_a_la_carpeta_del_reporte(self):
+        raiz, _ = analizar("![a](img/a.png) [b](https://b.com) [c](#seccion) [d](/abs/d.md)\n")
+        resultado = GeneradorHTML(raiz, "../../examples").generar_cuerpo()
+        self.assertIn('src="../../examples/img/a.png"', resultado)
+        self.assertIn('href="https://b.com"', resultado)
+        self.assertIn('href="#seccion"', resultado)
+        self.assertIn('href="/abs/d.md"', resultado)
+
     def test_estadisticas(self):
         estadisticas = calcular_estadisticas(analizar("[a](u) y [b](v) y ![c](w)\n")[0])
         self.assertEqual((estadisticas.enlaces, estadisticas.imagenes), (2, 1))

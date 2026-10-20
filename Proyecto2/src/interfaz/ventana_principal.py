@@ -497,6 +497,9 @@ class VentanaPrincipal(QMainWindow):
         self._mostrar_tokens()
         self._mostrar_errores()
         self._mostrar_arbol()
+        if self._ruta:
+            # Las imagenes relativas de la vista previa se cargan desde la carpeta del documento
+            self.vista_previa.document().setBaseUrl(QUrl.fromLocalFile(os.path.dirname(self._ruta) + os.sep))
         self.vista_previa.setHtml(GeneradorHTML(raiz).generar_cuerpo())
         self.editor.marcar_lineas_error({error.linea for error in self._errores})
         self.etiqueta_tiempo.setText(f"{milisegundos:.1f} ms")
@@ -514,7 +517,8 @@ class VentanaPrincipal(QMainWindow):
             if self._errores:
                 self._salidas = self._generador_reportes.generar_errores(self._errores, nombre)
             else:
-                self._salidas = self._generador_reportes.generar(self._raiz, nombre)
+                directorio = os.path.dirname(self._ruta) if self._ruta else None
+                self._salidas = self._generador_reportes.generar(self._raiz, nombre, directorio)
         except OSError as error:
             self._salidas = None
             QMessageBox.warning(self, "No se pudieron generar los reportes", str(error))
