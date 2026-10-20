@@ -154,8 +154,11 @@ class VentanaPrincipal(QMainWindow):
         self.editor.cursorPositionChanged.connect(self._actualizar_posicion)
         self.editor.document().modificationChanged.connect(self._actualizar_titulo)
 
+        # La configuracion inicial del editor no cuenta como cambio del usuario
+        self.editor.document().setModified(False)
         self._limpiar_resultados()
         self._actualizar_titulo()
+        self.editor.setFocus()
 
     # ------------------------------------------------------------------
     # Construccion de la interfaz
@@ -283,7 +286,7 @@ class VentanaPrincipal(QMainWindow):
         # Panel izquierdo: editor
         panel_editor, diseno_editor, self.etiqueta_archivo = self._crear_panel("Documento")
         self.editor = EditorCodigo()
-        self.editor.setPlaceholderText("Escriba aquí su documento Markdown o arrastre un archivo .md a la ventana.")
+        self.editor.setPlaceholderText("Escriba aquí o arrastre un archivo .md a la ventana")
         diseno_editor.addWidget(self.editor)
 
         # Panel derecho: resultados

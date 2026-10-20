@@ -133,7 +133,8 @@ class EditorCodigo(QPlainTextEdit):
             seleccion.cursor = QTextCursor(bloque)
             selecciones.append(seleccion)
 
-        if self.textCursor().blockNumber() + 1 not in self._lineas_error:
+        # Con el editor vacio no se resalta la linea, para no tapar el texto de ayuda
+        if not self.document().isEmpty() and self.textCursor().blockNumber() + 1 not in self._lineas_error:
             seleccion = QTextEdit.ExtraSelection()
             seleccion.format.setBackground(QColor(tema.LINEA_ACTUAL))
             seleccion.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
