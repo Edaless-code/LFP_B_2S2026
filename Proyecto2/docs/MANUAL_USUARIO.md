@@ -73,7 +73,7 @@ python main.py examples/ejemplo_valido.md
 | Zona | Descripcion |
 |---|---|
 | Barra de menus | Menus Archivo, Analisis, Reportes y Ayuda |
-| Barra de herramientas | Botones Nuevo, Abrir, Guardar, **Analizar** y los botones para abrir cada reporte |
+| Barra de herramientas | Botones Nuevo, Abrir, Guardar, **Analizar**, **En vivo**, el selector **Anidamiento máx.** y los botones para abrir cada reporte |
 | Panel Documento (izquierda) | Editor con numeros de linea. Muestra el nombre del archivo y si tiene cambios sin guardar |
 | Panel Resultados (derecha) | Mensaje con el resultado del analisis y las pestanas Tokens, Errores, Arbol de derivacion y Vista previa |
 | Barra de estado (abajo) | Mensajes de la aplicacion y la linea y columna del cursor |
@@ -111,6 +111,22 @@ Reglas que conviene recordar:
 - La negrita y la cursiva deben cerrarse dentro del mismo parrafo, item de
   lista, encabezado o linea de cita.
 
+### 5.1 Elementos adicionales (alcance opcional)
+
+| Elemento | Como se escribe | Ejemplo |
+|---|---|---|
+| Lista ordenada | Un numero, un punto y un espacio al inicio de la linea | `1. Primer paso` |
+| Lista de tareas | Una casilla despues de la vineta: `[ ]` pendiente, `[x]` completada | `- [x] Tarea hecha` |
+| Tachado | Texto entre dos virgulillas dobles | `~~texto~~` |
+| Enlace | Texto entre corchetes y la direccion entre parentesis, sin espacios | `[Graphviz](https://graphviz.org)` |
+| Imagen | Igual que un enlace, precedido de `!` | `![Logo](imagenes/logo.png)` |
+
+- Si un corchete no forma un enlace completo (por ejemplo `[nota]` sin
+  parentesis), se muestra como texto normal y no genera error.
+- Las rutas relativas de imagenes y enlaces parten de la carpeta del archivo
+  `.md`, igual que en cualquier editor de Markdown.
+- Las listas ordenadas siguen la misma regla de 2 espacios por nivel.
+
 ---
 
 ## 6. Cargar un Archivo
@@ -144,10 +160,30 @@ resultado:
 |---|---|
 | Verde: "Análisis completado sin errores" | El documento es valido. Se generaron los tres reportes y el arbol |
 | Rojo: "Se encontraron N errores" | El documento tiene errores. Se abre la pestana Errores y se genera el reporte de errores |
-| Gris: "El documento cambió desde el último análisis" | Se edito el texto despues de analizar; presione F5 de nuevo |
+| Amarillo: "Advertencia: se supera la profundidad máxima configurada" | El documento es valido y los reportes se generaron, pero alguna lista o cita supera el anidamiento maximo configurado |
+| Gris: "El documento cambió desde el último análisis" | Se edito el texto con el analisis en vivo desactivado; presione F5 de nuevo |
 
 En la esquina superior derecha del panel se muestra el tiempo que tomo el
 analisis.
+
+### 7.1 Analisis en vivo
+
+Con el boton **En vivo** activado (Ctrl+L, activo por defecto), el documento
+se analiza solo medio segundo despues de dejar de escribir: las tablas, el
+arbol, la vista previa y los reportes se actualizan sin presionar F5. Mientras
+se escribe, la aplicacion no cambia de pestana. Para analizar solo con F5,
+desactive el boton.
+
+### 7.2 Advertencia de anidamiento
+
+El selector **Anidamiento máx.** de la barra de herramientas define cuantos
+niveles de listas o citas se consideran aceptables (3 por defecto, de 1 a 10).
+Si el documento los supera, el mensaje de resultado se muestra en amarillo con
+el tipo de elemento, el nivel alcanzado y la linea. No es un error: el
+documento es valido y los reportes se generan igual. Al cambiar el valor, la
+advertencia se recalcula de inmediato.
+
+![Advertencia de anidamiento](imagenes/gui_advertencia.png)
 
 ---
 
@@ -174,6 +210,10 @@ aparece en el documento.
 | CERCA_CODIGO, LENGUAJE | Los tres acentos graves y el lenguaje del bloque de codigo |
 | TEXTO_LITERAL | Contenido de codigo, que no se interpreta |
 | NEGRITA, CURSIVA, CODIGO_INLINE | Delimitadores `**`, `*` y acento grave |
+| ENUMERADOR | El numero de un item de lista ordenada (`1.`) |
+| CASILLA | La casilla de una tarea (`[ ]` o `[x]`) |
+| TACHADO | Delimitador `~~` |
+| CORCHETE_ABRE, IMAGEN_ABRE, CORCHETE_CIERRA, URL | Partes de un enlace o de una imagen |
 | REGLA_HORIZONTAL | La linea `---` |
 | TEXTO | Texto normal |
 | SALTO_LINEA | Fin de una linea de encabezado, item, cita o parrafo |
@@ -208,6 +248,7 @@ Haga doble clic en un error para llevar el cursor a su posicion.
 |---|---|---|
 | NEGRITA_SIN_CERRAR | Se abrio `**` y no se cerro | Agregue el `**` de cierre en la misma linea o parrafo |
 | CURSIVA_SIN_CERRAR | Se abrio `*` y no se cerro | Agregue el `*` de cierre |
+| TACHADO_SIN_CERRAR | Se abrio `~~` y no se cerro | Agregue el `~~` de cierre |
 | CODIGO_INLINE_SIN_CERRAR | Se abrio un acento grave y no se cerro | Agregue el acento grave de cierre |
 | BLOQUE_CODIGO_SIN_CERRAR | Se abrio un bloque con tres acentos graves y el archivo termino | Agregue una linea con tres acentos graves al final del codigo |
 | ENCABEZADO_INVALIDO | Mas de 6 `#` al inicio de la linea | Use de 1 a 6 `#` |
@@ -272,17 +313,25 @@ la parte superior de los tres reportes hay una barra para pasar de uno a otro.
 ### 11.3 Reporte 1: Documento HTML
 
 Muestra el documento con su formato: encabezados, listas anidadas, citas
-anidadas, negrita, cursiva, codigo y reglas horizontales.
+anidadas, negrita, cursiva, codigo y reglas horizontales. El codigo de los
+bloques se colorea segun su lenguaje (requiere conexion a internet; sin ella
+se muestra sin colores).
 
 ![Reporte 1](imagenes/reporte1_documento.png)
+
+Con los elementos adicionales: lista ordenada, tareas, tachado, enlaces e
+imagenes.
+
+![Reporte 1 con elementos adicionales](imagenes/reporte1_opcional.png)
 
 ### 11.4 Reporte 2: Estadisticas
 
 Resume la estructura del documento: total de palabras y parrafos, cantidad de
 encabezados por nivel en un grafico de barras, cantidad de listas, items,
 citas y bloques de codigo, profundidad maxima de anidamiento de listas y citas,
-y cantidad de negritas, cursivas, codigos en linea y reglas horizontales. Las
-palabras dentro de codigo no se cuentan.
+cantidad de negritas, cursivas, codigos en linea y reglas horizontales, y de
+los elementos adicionales (tachados, enlaces, imagenes, listas ordenadas y
+tareas completadas). Las palabras dentro de codigo no se cuentan.
 
 ![Reporte 2](imagenes/reporte2_estadisticas.png)
 
@@ -325,6 +374,7 @@ dot -Tpng arbol.dot -o arbol.png
 | Ctrl+S | Guardar |
 | Ctrl+Shift+S | Guardar como |
 | F5 | Analizar |
+| Ctrl+L | Activar o desactivar el analisis en vivo |
 | Ctrl+1 a Ctrl+6 | Abrir reportes y carpeta de salidas |
 | F1 | Sintaxis soportada |
 | Ctrl+Q | Salir |

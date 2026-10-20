@@ -30,8 +30,10 @@ estan en `salidas/<nombre del caso>/`.
 | 12 | Documento sin encabezados | `caso12_sin_encabezados.md` | 14 | 0 | Correcto |
 | 13 | Archivo vacio | `caso13_archivo_vacio.md` | 1 | 0 | Correcto |
 | 14 | Ejemplo del enunciado (seccion 4.7) | `ejemplo_valido.md` | 74 | 0 | Correcto |
+| 15 | Alcance opcional valido | `caso15_alcance_opcional.md` | 82 | 0 | Correcto |
+| 16 | Errores en el alcance opcional | `caso16_errores_opcionales.md` | 27 | 3 | Correcto |
 
-Ademas de estos casos, la carpeta `tests/` contiene 97 pruebas unitarias
+Ademas de estos casos, la carpeta `tests/` contiene 124 pruebas unitarias
 automatizadas que se ejecutan con:
 
 ```bash
@@ -517,3 +519,94 @@ cursiva, 1 codigo en linea y 1 regla horizontal.
 Reporte 2. El Reporte 1 produce exactamente las etiquetas que describe el
 enunciado: `<h1>`, `<ul><li>` anidados en 3 niveles, `<blockquote>` dentro de
 `<blockquote>` y `<pre><code class="language-python">`.
+
+---
+
+## Caso 15: Alcance opcional valido
+
+**Objetivo:** verificar los elementos del alcance opcional: lista ordenada con
+sublista de tareas, texto tachado, enlaces con formato, imagen con ruta
+relativa y resaltado de sintaxis.
+
+**Entrada** (`caso15_alcance_opcional.md`):
+
+````markdown
+# Alcance opcional
+
+## Lista ordenada con tareas
+
+1. Disenar la gramatica
+  - [x] Definir los tokens
+  - [x] Dibujar el AFD
+2. Implementar el analizador
+  - [ ] Pruebas de integracion
+3. Entregar el proyecto
+
+## Texto tachado
+
+La entrega ~~era el viernes~~ es el lunes.
+
+## Enlaces e imagenes
+
+Consulte la [guia de **Markdown**](https://www.markdownguide.org/basic-syntax/) y la [documentacion de Graphviz](https://graphviz.org/doc/info/lang.html).
+
+![Arbol de derivacion del caso 12](../docs/imagenes/arbol_caso12.png)
+
+## Codigo con resaltado de sintaxis
+
+```python
+def saludo(nombre):
+    # Los **asteriscos** siguen siendo literales
+    return f"Hola {nombre}"
+```
+````
+
+**Resultado esperado:** sin errores; `<ol>` con una sublista `<ul>` de tareas
+(dos marcadas y una pendiente), `<del>`, dos `<a>` (uno con `<strong>`
+dentro), una `<img>` cuya ruta relativa sigue apuntando al archivo desde la
+carpeta del reporte, y el bloque de codigo coloreado por highlight.js.
+
+**Resultado obtenido:** 82 tokens, 0 errores. Reporte 2: 1 lista ordenada,
+3 tareas (2 completadas), 1 tachado, 2 enlaces y 1 imagen. En el Reporte 1:
+
+- `<ol>` contiene `<li class="tarea"><input type="checkbox" disabled checked>Definir los tokens</li>`.
+- `<a href="https://www.markdownguide.org/basic-syntax/">guia de <strong>Markdown</strong></a>`.
+- `<img src="../../examples/../docs/imagenes/arbol_caso12.png" ...>`: la ruta
+  se ajusto desde `salidas/caso15_alcance_opcional/` y la imagen se muestra.
+- El reporte carga highlight.js porque el documento tiene un bloque de codigo.
+
+---
+
+## Caso 16: Errores en el alcance opcional
+
+**Objetivo:** verificar TACHADO_SIN_CERRAR, un error lexico dentro de un item
+de tarea, que un enlace incompleto no genera error y que la indentacion de las
+listas ordenadas se valida igual que la de las no ordenadas.
+
+**Entrada** (`caso16_errores_opcionales.md`):
+
+```markdown
+# Errores en el alcance opcional
+
+Este ~~tachado nunca se cierra.
+
+- [x] Una tarea con **negrita abierta
+
+[Un enlace](sin cierre de parentesis
+1. Uno
+     2. Indentacion invalida en una lista ordenada
+```
+
+**Resultado esperado:** tres errores; la linea 7 (enlace sin parentesis de
+cierre) se trata como texto normal, sin error.
+
+**Resultado obtenido:**
+
+| No. | Lexema | Tipo | Fase | Descripcion |
+|---|---|---|---|---|
+| 1 | `~~` | TACHADO_SIN_CERRAR | Lexico | Tachado sin cerrar iniciado en línea 3, columna 6 |
+| 2 | `**` | NEGRITA_SIN_CERRAR | Lexico | Negrita sin cerrar iniciada en línea 5, columna 21 |
+| 3 | `2.` | INDENTACION_INVALIDA | Sintactico | Indentación inválida en línea 9, columna 6 |
+
+La casilla `[x]` de la linea 5 se reconoce como CASILLA aunque el resto del
+item tenga un error, y la linea 7 produce un unico token TEXTO.

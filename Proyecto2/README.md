@@ -40,6 +40,20 @@ markdown2).**
 | Bloques de codigo | ```` ``` ```` ... ```` ``` ```` | `<pre><code>` |
 | Regla horizontal | `---` | `<hr>` |
 
+Alcance opcional implementado:
+
+| Elemento | Sintaxis | HTML generado |
+|---|---|---|
+| Listas ordenadas | `1.` | `<ol>` |
+| Listas de tareas | `- [ ]`, `- [x]` | `<li>` con casilla |
+| Tachado | `~~texto~~` | `<del>` |
+| Enlaces | `[texto](url)` | `<a>` |
+| Imagenes | `![alt](url)` | `<img>` |
+
+Ademas: vista previa en vivo del HTML, advertencia configurable de
+anidamiento excesivo y resaltado de sintaxis de los bloques de codigo en el
+Reporte 1 (highlight.js).
+
 ## Requisitos
 
 - **Python 3.10 o superior**
@@ -71,7 +85,8 @@ python main.py examples/ejemplo_valido.md
 
 1. **Abrir** (Ctrl+O) carga un archivo `.md`; tambien se puede arrastrar el
    archivo a la ventana o escribir directamente en el editor.
-2. **Analizar** (F5) ejecuta el analisis lexico y sintactico.
+2. **Analizar** (F5) ejecuta el analisis lexico y sintactico. Con **En vivo**
+   activo (Ctrl+L) el analisis se ejecuta solo al dejar de escribir.
 3. El panel derecho muestra los resultados en cuatro pestanas:
 
    | Pestana | Contenido |
@@ -119,7 +134,7 @@ Proyecto2/
 │   ├── reportes/            GeneradorHTML, estadisticas, indice y arbol.dot
 │   └── interfaz/            VentanaPrincipal, editor con numeros de linea y tema
 ├── tests/                   Pruebas unitarias
-├── examples/                Archivos .md de entrada (ejemplo del enunciado y 13 casos de prueba)
+├── examples/                Archivos .md de entrada (ejemplo del enunciado y 15 casos de prueba)
 ├── docs/                    Manual tecnico, manual de usuario y casos de prueba
 └── salidas/                 Reportes HTML y arbol.dot generados
 ```
@@ -131,7 +146,7 @@ Proyecto2/
   estrategia de recuperacion de errores.
 - [Manual de usuario](docs/MANUAL_USUARIO.md): instalacion, uso de la interfaz,
   sintaxis soportada, interpretacion de las tablas y de los reportes.
-- [Casos de prueba](docs/CASOS_PRUEBA.md): 14 casos con entrada, resultado
+- [Casos de prueba](docs/CASOS_PRUEBA.md): 16 casos con entrada, resultado
   esperado y resultado obtenido.
 
 Los tres documentos tambien estan en PDF en la carpeta `docs/`.
@@ -144,3 +159,4 @@ Los tres documentos tambien estan en PDF en la carpeta `docs/`.
 | 2 | Analizador lexico (AFD) y gestor de errores | Completada |
 | 3 | Parser descendente recursivo e interfaz grafica | Completada |
 | 4 | Reportes, pruebas y documentacion | Completada |
+| 5 | Alcance opcional | Completada (excepto tablas Markdown) |
