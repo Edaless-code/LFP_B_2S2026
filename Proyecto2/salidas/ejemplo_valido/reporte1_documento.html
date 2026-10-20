@@ -79,8 +79,14 @@ h2.seccion {
 }
 .documento blockquote p { margin: 6px 0; }
 .documento hr { border: none; border-top: 1px solid #DDE2E8; margin: 24px 0; }
-.documento ul { padding-left: 26px; }
+.documento ul, .documento ol { padding-left: 26px; }
 .documento li { margin: 2px 0; }
+.documento li.tarea { list-style: none; margin-left: -20px; }
+.documento li.tarea input { margin: 0 8px 0 0; vertical-align: middle; }
+.documento a { color: #2E75B6; }
+.documento del { color: #7B8794; }
+.documento img { max-width: 100%; border-radius: 6px; }
+.documento pre code.hljs { background: none; padding: 0; }
 
 /* Reporte 2: estadisticas */
 .tarjetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -158,6 +164,7 @@ table.errores td { padding: 8px; border-bottom: 1px solid #EEF1F4; vertical-alig
 table.errores td.tipo { color: #B42318; font-weight: 600; }
 table.errores td.numero { text-align: right; }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 </head>
 <body>
 <nav><a href="reporte1_documento.html" class="actual">Reporte 1: Documento HTML</a><a href="reporte2_estadisticas.html">Reporte 2: Estadísticas</a><a href="reporte3_indice.html">Reporte 3: Tabla de contenido</a></nav>
@@ -198,5 +205,7 @@ table.errores td.numero { text-align: right; }
 <p>Fin del documento.</p>
 </article>
 </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>if (window.hljs) { hljs.highlightAll(); }</script>
 </body>
 </html>

@@ -79,8 +79,14 @@ h2.seccion {
 }
 .documento blockquote p { margin: 6px 0; }
 .documento hr { border: none; border-top: 1px solid #DDE2E8; margin: 24px 0; }
-.documento ul { padding-left: 26px; }
+.documento ul, .documento ol { padding-left: 26px; }
 .documento li { margin: 2px 0; }
+.documento li.tarea { list-style: none; margin-left: -20px; }
+.documento li.tarea input { margin: 0 8px 0 0; vertical-align: middle; }
+.documento a { color: #2E75B6; }
+.documento del { color: #7B8794; }
+.documento img { max-width: 100%; border-radius: 6px; }
+.documento pre code.hljs { background: none; padding: 0; }
 
 /* Reporte 2: estadisticas */
 .tarjetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -170,7 +176,9 @@ table.errores td.numero { text-align: right; }
 <h2 class="seccion">Profundidad máxima de anidamiento</h2>
 <div class="pares"><div class="par"><span>Listas</span><strong class="listas">0 niveles</strong></div><div class="par"><span>Citas</span><strong class="citas">3 niveles</strong></div></div>
 <h2 class="seccion">Elementos en línea</h2>
-<div class="pares"><div class="par"><span>Negrita (**texto**)</span><strong>1</strong></div><div class="par"><span>Cursiva (*texto*)</span><strong>1</strong></div><div class="par"><span>Código en línea (`texto`)</span><strong>1</strong></div><div class="par"><span>Regla horizontal (---)</span><strong>0</strong></div></div>
+<div class="pares"><div class="par"><span>Negrita (**texto**)</span><strong>1</strong></div><div class="par"><span>Cursiva (*texto*)</span><strong>1</strong></div><div class="par"><span>Código en línea (`texto`)</span><strong>1</strong></div><div class="par"><span>Regla horizontal (---)</span><strong>0</strong></div><div class="par"><span>Tachado (~~texto~~)</span><strong>0</strong></div><div class="par"><span>Enlaces [texto](url)</span><strong>0</strong></div><div class="par"><span>Imágenes ![alt](url)</span><strong>0</strong></div><div class="par"><span>Listas ordenadas (1.)</span><strong>0</strong></div></div>
+<h2 class="seccion">Listas de tareas</h2>
+<div class="pares"><div class="par"><span>Tareas</span><strong>0</strong></div><div class="par"><span>Tareas completadas</span><strong>0 de 0</strong></div></div>
 <p class="nota">Todos los valores se calculan recorriendo el árbol de derivación. Las palabras dentro de código no se cuentan.</p>
 </main>
 </body>
