@@ -60,7 +60,28 @@ cd Proyecto2
 python main.py
 ```
 
-En Windows puede usarse `py main.py`.
+En Windows puede usarse `py main.py`. Tambien se puede abrir un archivo
+directamente:
+
+```bash
+python main.py examples/ejemplo_valido.md
+```
+
+## Uso de la interfaz
+
+1. **Abrir** (Ctrl+O) carga un archivo `.md`; tambien se puede arrastrar el
+   archivo a la ventana o escribir directamente en el editor.
+2. **Analizar** (F5) ejecuta el analisis lexico y sintactico.
+3. El panel derecho muestra los resultados en tres pestanas:
+
+   | Pestana | Contenido |
+   |---|---|
+   | Tokens | No., lexema, tipo, linea y columna de cada token |
+   | Errores | No., lexema, tipo, fase, descripcion, linea y columna |
+   | Arbol de derivacion | Arbol construido por el parser, con no terminales y terminales diferenciados |
+
+4. Doble clic en un token, un error o una hoja del arbol ubica el cursor en esa
+   posicion del documento. Las lineas con error se resaltan en el editor.
 
 ## Pruebas
 
@@ -80,8 +101,9 @@ Proyecto2/
 ├── src/
 │   ├── modelos/             TipoToken, Token, ErrorAnalisis, NodoAST
 │   ├── analizador/          AnalizadorLexico, AnalizadorSintactico, GestorErrores
+│   ├── servicios/           CargadorArchivos (lectura y validacion de .md)
 │   ├── reportes/            GeneradorHTML, estadisticas, indice y arbol.dot
-│   └── interfaz/            Ventana principal en PyQt6
+│   └── interfaz/            VentanaPrincipal, editor con numeros de linea y tema
 ├── tests/                   Pruebas unitarias
 ├── examples/                Archivos .md de entrada
 ├── docs/                    Manual tecnico, manual de usuario y casos de prueba
@@ -99,5 +121,5 @@ Proyecto2/
 |---|---|---|
 | 1 | Estructura, modelos base, gramatica y AFD | Completada |
 | 2 | Analizador lexico (AFD) y gestor de errores | Completada |
-| 3 | Parser descendente recursivo e interfaz grafica | Pendiente |
+| 3 | Parser descendente recursivo e interfaz grafica | Completada |
 | 4 | Reportes, pruebas y documentacion | Pendiente |

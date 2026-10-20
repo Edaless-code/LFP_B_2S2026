@@ -16,12 +16,12 @@ El sistema se organiza en capas. Cada una depende unicamente de las que estan
 por debajo, nunca al reves.
 
 ```
-  interfaz        VentanaPrincipal (PyQt6)
+  interfaz        VentanaPrincipal, EditorCodigo, tema (PyQt6)
       |
       v
-  reportes        GeneradorHTML, reporte de estadisticas, reporte de indice, generador DOT
-      |
-      v
+  servicios       CargadorArchivos            reportes   GeneradorHTML, estadisticas, indice, DOT
+      |                                           |
+      v                                           v
   analizador      AnalizadorLexico, AnalizadorSintactico, GestorErrores
       |
       v
@@ -31,6 +31,7 @@ por debajo, nunca al reves.
 | Capa | Paquete | Responsabilidad |
 |---|---|---|
 | Presentacion | `src/interfaz/` | Recibir acciones del usuario y mostrar resultados. No contiene logica de analisis |
+| Entrada | `src/servicios/` | Validar que el archivo exista, sea un archivo `.md` legible y decodificarlo |
 | Salida | `src/reportes/` | Recorrer el arbol de derivacion y producir HTML y DOT |
 | Motor de analisis | `src/analizador/` | Tokenizar, construir el arbol y acumular errores |
 | Datos | `src/modelos/` | Estructuras sin logica de negocio |
@@ -53,6 +54,20 @@ GeneradorHTML / reportes / DOT         recorren el arbol, nunca el texto origina
 El parser consume los tokens a demanda mediante `siguiente_token()`; el
 analizador lexico no necesita producir la lista completa antes de que empiece
 el analisis sintactico.
+
+### 1.3 Interfaz grafica
+
+| Clase | Archivo | Responsabilidad |
+|---|---|---|
+| `VentanaPrincipal` | `interfaz/ventana_principal.py` | Menus, barra de herramientas, apertura y guardado, ejecucion del analisis y presentacion de tokens, errores y arbol |
+| `EditorCodigo` | `interfaz/editor_codigo.py` | Editor con numeros de linea, resaltado de la linea actual y de las lineas con error, y navegacion a una posicion |
+| `tema` | `interfaz/tema.py` | Paleta clara fija y hoja de estilos QSS; los colores del arbol son los de la seccion 4.10 del enunciado |
+| `CargadorArchivos` | `servicios/cargador_archivos.py` | Valida existencia, tipo y extension; intenta UTF-8, cp1252 y latin-1 en ese orden |
+
+`VentanaPrincipal` no contiene logica de analisis: crea el `GestorErrores`,
+el `AnalizadorLexico` y el `AnalizadorSintactico`, ejecuta `analizar()` y
+muestra lo que devuelven. Cualquier excepcion inesperada se informa en un
+cuadro de dialogo para que la aplicacion no se cierre.
 
 ---
 
