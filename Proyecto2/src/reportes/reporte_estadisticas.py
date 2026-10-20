@@ -22,6 +22,9 @@ class Estadisticas:
         profundidad_citas: Maxima cantidad de <cita> anidadas.
         bloques_codigo, negritas, cursivas, codigos_inline, reglas: Cantidad de
             nodos de cada tipo.
+        tachados, enlaces, imagenes: Elementos en linea del alcance opcional.
+        listas_ordenadas: Listas (de cualquier nivel) con enumerador.
+        tareas, tareas_completadas: Items con casilla y con casilla marcada.
     """
 
     def __init__(self) -> None:
@@ -39,6 +42,12 @@ class Estadisticas:
         self.cursivas = 0
         self.codigos_inline = 0
         self.reglas = 0
+        self.tachados = 0
+        self.enlaces = 0
+        self.imagenes = 0
+        self.listas_ordenadas = 0
+        self.tareas = 0
+        self.tareas_completadas = 0
 
     @property
     def encabezados(self) -> int:
@@ -60,11 +69,16 @@ def calcular_estadisticas(raiz: NodoAST) -> Estadisticas:
         if nodo.es_terminal:
             if nodo.token.tipo == TipoToken.TEXTO:
                 estadisticas.palabras += contar_palabras(nodo.lexema)
+            elif nodo.token.tipo == TipoToken.CASILLA:
+                estadisticas.tareas += 1
+                estadisticas.tareas_completadas += 1 if nodo.lexema[1] in ("x", "X") else 0
             return
 
         if simbolo == "<lista>":
             nivel_lista += 1
             estadisticas.listas += 1 if nivel_lista == 1 else 0
+            if nodo.hijos[0].hijos[0].token.tipo == TipoToken.ENUMERADOR:
+                estadisticas.listas_ordenadas += 1
             estadisticas.profundidad_listas = max(estadisticas.profundidad_listas, nivel_lista)
         elif simbolo == "<cita>":
             nivel_cita += 1
@@ -88,6 +102,12 @@ def calcular_estadisticas(raiz: NodoAST) -> Estadisticas:
             estadisticas.codigos_inline += 1
         elif simbolo == "<regla_horizontal>":
             estadisticas.reglas += 1
+        elif simbolo == "<tachado>":
+            estadisticas.tachados += 1
+        elif simbolo == "<enlace>":
+            estadisticas.enlaces += 1
+        elif simbolo == "<imagen>":
+            estadisticas.imagenes += 1
 
         for hijo in nodo.hijos:
             recorrer(hijo, nivel_lista, nivel_cita)
@@ -153,6 +173,15 @@ def generar_reporte_estadisticas(estadisticas: Estadisticas, nombre_archivo: str
         f'{_par("Cursiva (*texto*)", str(e.cursivas))}'
         f'{_par("Código en línea (`texto`)", str(e.codigos_inline))}'
         f'{_par("Regla horizontal (---)", str(e.reglas))}'
+        f'{_par("Tachado (~~texto~~)", str(e.tachados))}'
+        f'{_par("Enlaces [texto](url)", str(e.enlaces))}'
+        f'{_par("Imágenes ![alt](url)", str(e.imagenes))}'
+        f'{_par("Listas ordenadas (1.)", str(e.listas_ordenadas))}'
+        "</div>\n"
+        '<h2 class="seccion">Listas de tareas</h2>\n'
+        '<div class="pares">'
+        f'{_par("Tareas", str(e.tareas))}'
+        f'{_par("Tareas completadas", f"{e.tareas_completadas} de {e.tareas}")}'
         "</div>\n"
         '<p class="nota">Todos los valores se calculan recorriendo el árbol de derivación. '
         "Las palabras dentro de código no se cuentan.</p>"

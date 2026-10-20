@@ -3,6 +3,11 @@
 El HTML se genera recorriendo el arbol construido por el parser, nunca el
 texto original: cada no terminal tiene un metodo que produce su fragmento a
 partir de los fragmentos de sus hijos.
+
+Si el documento tiene bloques de codigo, el reporte carga highlight.js desde
+una CDN para colorear la sintaxis (alcance opcional). Es solo visual: el
+contenido del bloque ya esta escapado y, sin conexion a internet, el codigo
+se muestra igual pero sin colores.
 """
 
 from modelos.nodo_ast import NodoAST
@@ -10,6 +15,15 @@ from modelos.tipo_token import TipoToken
 from reportes.estilos import ARCHIVO_DOCUMENTO, atributo_html, pagina, texto_html
 
 ANCLA_POR_DEFECTO = "seccion"
+MARCAS_CASILLA_COMPLETA = ("x", "X")
+
+VERSION_HIGHLIGHT = "11.9.0"
+URL_HIGHLIGHT = f"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/{VERSION_HIGHLIGHT}"
+CABECERA_HIGHLIGHT = f'<link rel="stylesheet" href="{URL_HIGHLIGHT}/styles/atom-one-dark.min.css">\n'
+SCRIPTS_HIGHLIGHT = (
+    f'<script src="{URL_HIGHLIGHT}/highlight.min.js"></script>\n'
+    "<script>if (window.hljs) { hljs.highlightAll(); }</script>\n"
+)
 
 
 class Encabezado:
@@ -103,7 +117,10 @@ class GeneradorHTML:
             "<en_linea>": self._hijos,
             "<negrita>": self._negrita,
             "<cursiva>": self._cursiva,
+            "<tachado>": self._tachado,
             "<codigo_inline>": self._codigo_inline,
+            "<enlace>": self._enlace,
+            "<imagen>": self._imagen,
         }
 
     def generar_cuerpo(self) -> str:
@@ -117,7 +134,21 @@ class GeneradorHTML:
             '<div class="insignia">Análisis completado sin errores</div>\n'
             f'<article class="documento">\n{self.generar_cuerpo()}</article>'
         )
+        if self._tiene_codigo(self._raiz):
+            return pagina(
+                f"{nombre_archivo} - Documento HTML",
+                cuerpo,
+                ARCHIVO_DOCUMENTO,
+                cabecera_extra=CABECERA_HIGHLIGHT,
+                scripts=SCRIPTS_HIGHLIGHT,
+            )
         return pagina(f"{nombre_archivo} - Documento HTML", cuerpo, ARCHIVO_DOCUMENTO)
+
+    def _tiene_codigo(self, nodo: NodoAST) -> bool:
+        """Indica si el subarbol contiene algun <bloque_codigo>."""
+        if nodo.simbolo == "<bloque_codigo>":
+            return True
+        return any(self._tiene_codigo(hijo) for hijo in nodo.hijos)
 
     # ------------------------------------------------------------------
     # Recorrido
@@ -164,13 +195,36 @@ class GeneradorHTML:
         return f"<p>{self._hijos(nodo)}</p>\n"
 
     def _lista(self, nodo: NodoAST) -> str:
-        return f"<ul>\n{self._hijos(nodo)}</ul>\n"
+        """<ul> si los items usan vineta; <ol> si usan enumerador.
+
+        Si una lista ordenada no empieza en 1 se conserva su numero inicial
+        con el atributo start.
+        """
+        marcador = nodo.hijos[0].hijos[0].token
+        if marcador.tipo != TipoToken.ENUMERADOR:
+            return f"<ul>\n{self._hijos(nodo)}</ul>\n"
+        inicio = int(marcador.lexema[:-1])
+        atributo = f' start="{inicio}"' if inicio != 1 else ""
+        return f"<ol{atributo}>\n{self._hijos(nodo)}</ol>\n"
 
     def _item_lista(self, nodo: NodoAST) -> str:
         contenido = self._traducir(self._hijo(nodo, "<en_linea>"))
         sublista = self._hijo(nodo, "<sublista>")
         anidada = f"\n{self._traducir(sublista)}" if sublista is not None else ""
-        return f"<li>{contenido}{anidada}</li>\n"
+
+        casilla = self._casilla(nodo)
+        if casilla is None:
+            return f"<li>{contenido}{anidada}</li>\n"
+        marcada = " checked" if casilla.lexema[1] in MARCAS_CASILLA_COMPLETA else ""
+        return f'<li class="tarea"><input type="checkbox" disabled{marcada}>{contenido}{anidada}</li>\n'
+
+    @staticmethod
+    def _casilla(nodo: NodoAST) -> NodoAST | None:
+        """Hoja CASILLA de un <item_lista>, o None si no es una tarea."""
+        for hijo in nodo.hijos:
+            if hijo.es_terminal and hijo.token.tipo == TipoToken.CASILLA:
+                return hijo
+        return None
 
     def _cita(self, nodo: NodoAST) -> str:
         return f"<blockquote>\n{self._hijos(nodo)}</blockquote>\n"
@@ -203,6 +257,26 @@ class GeneradorHTML:
     def _cursiva(self, nodo: NodoAST) -> str:
         return f"<em>{self._traducir(self._hijo(nodo, '<en_linea>'))}</em>"
 
+    def _tachado(self, nodo: NodoAST) -> str:
+        return f"<del>{self._traducir(self._hijo(nodo, '<en_linea>'))}</del>"
+
     @staticmethod
     def _codigo_inline(nodo: NodoAST) -> str:
         return f"<code>{texto_html(texto_plano(nodo))}</code>"
+
+    @staticmethod
+    def _destino(nodo: NodoAST) -> str:
+        """Destino de un enlace o imagen: el lexema de URL sin los parentesis."""
+        for hijo in nodo.hijos:
+            if hijo.es_terminal and hijo.token.tipo == TipoToken.URL:
+                return hijo.lexema[1:-1]
+        return ""
+
+    def _enlace(self, nodo: NodoAST) -> str:
+        texto = self._traducir(self._hijo(nodo, "<en_linea>"))
+        return f'<a href="{atributo_html(self._destino(nodo))}">{texto}</a>'
+
+    def _imagen(self, nodo: NodoAST) -> str:
+        alternativo = texto_plano(nodo)
+        return f'<img src="{atributo_html(self._destino(nodo))}" alt="{atributo_html(alternativo)}">'
+

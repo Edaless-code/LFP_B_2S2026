@@ -87,8 +87,14 @@ h2.seccion {
 }
 .documento blockquote p { margin: 6px 0; }
 .documento hr { border: none; border-top: 1px solid #DDE2E8; margin: 24px 0; }
-.documento ul { padding-left: 26px; }
+.documento ul, .documento ol { padding-left: 26px; }
 .documento li { margin: 2px 0; }
+.documento li.tarea { list-style: none; margin-left: -20px; }
+.documento li.tarea input { margin: 0 8px 0 0; vertical-align: middle; }
+.documento a { color: #2E75B6; }
+.documento del { color: #7B8794; }
+.documento img { max-width: 100%; border-radius: 6px; }
+.documento pre code.hljs { background: none; padding: 0; }
 
 /* Reporte 2: estadisticas */
 .tarjetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -184,7 +190,13 @@ def atributo_html(texto: str) -> str:
     return escape(texto, quote=True)
 
 
-def pagina(titulo: str, cuerpo: str, archivo_actual: str | None = None) -> str:
+def pagina(
+    titulo: str,
+    cuerpo: str,
+    archivo_actual: str | None = None,
+    cabecera_extra: str = "",
+    scripts: str = "",
+) -> str:
     """Envuelve el cuerpo en un documento HTML completo con el CSS embebido.
 
     Args:
@@ -192,6 +204,8 @@ def pagina(titulo: str, cuerpo: str, archivo_actual: str | None = None) -> str:
         cuerpo: Contenido HTML que va dentro del contenedor principal.
         archivo_actual: Nombre del reporte que se esta generando. Si es uno
             de los tres reportes, se agrega la barra de navegacion entre ellos.
+        cabecera_extra: Etiquetas adicionales para <head> (hojas de estilo).
+        scripts: Scripts que se agregan al final de <body>.
     """
     navegacion = ""
     if archivo_actual is not None:
@@ -209,10 +223,12 @@ def pagina(titulo: str, cuerpo: str, archivo_actual: str | None = None) -> str:
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
         f"<title>{texto_html(titulo)}</title>\n"
         f"<style>{CSS}</style>\n"
+        f"{cabecera_extra}"
         "</head>\n"
         "<body>\n"
         f"{navegacion}"
         f'<main class="contenedor">\n{cuerpo}\n</main>\n'
+        f"{scripts}"
         "</body>\n"
         "</html>\n"
     )
