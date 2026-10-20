@@ -8,7 +8,7 @@ GeneradorReportes que escriba los reportes. No contiene logica de analisis.
 import os
 import time
 
-from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtCore import Qt, QTimer, QUrl
 from PyQt6.QtGui import (
     QAction,
     QCloseEvent,
@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMainWindow,
     QMessageBox,
+    QSpinBox,
     QSplitter,
     QTableWidget,
     QTableWidgetItem,
@@ -40,6 +41,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from analizador.advertencias import AdvertenciaAnidamiento, buscar_anidamiento_excesivo
 from analizador.analizador_lexico import AnalizadorLexico
 from analizador.analizador_sintactico import AnalizadorSintactico
 from analizador.gestor_errores import GestorErrores
@@ -56,6 +58,10 @@ NOMBRE_APLICACION = "MarkdownCheck"
 DIRECTORIO_PROYECTO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DIRECTORIO_EJEMPLOS = os.path.join(DIRECTORIO_PROYECTO, "examples")
 DIRECTORIO_SALIDAS = os.path.join(DIRECTORIO_PROYECTO, "salidas")
+MILISEGUNDOS_ANALISIS_EN_VIVO = 500
+PROFUNDIDAD_MAXIMA_POR_DEFECTO = 3
+PROFUNDIDAD_MAXIMA_LIMITE = 10
+ADVERTENCIAS_VISIBLES = 3
 NOMBRE_SIN_TITULO = "sin_titulo.md"
 FILTRO_MARKDOWN = "Archivos Markdown (*.md)"
 
@@ -93,6 +99,12 @@ AYUDA_SINTAXIS = """
 <tr><td><b>Cita</b></td><td><code>&gt; texto</code>; anidada con <code>&gt;&gt;</code> o <code>&gt; &gt;</code></td></tr>
 <tr><td><b>Bloque de código</b></td><td><code>```lenguaje</code> ... <code>```</code></td></tr>
 <tr><td><b>Regla horizontal</b></td><td><code>---</code></td></tr>
+<tr><td colspan="2"><br><b>Alcance opcional</b></td></tr>
+<tr><td><b>Lista ordenada</b></td><td><code>1. elemento</code></td></tr>
+<tr><td><b>Lista de tareas</b></td><td><code>- [ ] pendiente</code>, <code>- [x] completada</code></td></tr>
+<tr><td><b>Tachado</b></td><td><code>~~texto~~</code></td></tr>
+<tr><td><b>Enlace</b></td><td><code>[texto](https://sitio.com)</code></td></tr>
+<tr><td><b>Imagen</b></td><td><code>![descripción](imagen.png)</code></td></tr>
 </table>
 """
 
@@ -120,6 +132,12 @@ class VentanaPrincipal(QMainWindow):
         self._analisis_vigente = False
         self._salidas: SalidasGeneradas | None = None
         self._generador_reportes = GeneradorReportes(DIRECTORIO_SALIDAS)
+
+        # Analisis en vivo: se reinicia con cada cambio y se dispara al dejar de escribir
+        self._temporizador_vivo = QTimer(self)
+        self._temporizador_vivo.setSingleShot(True)
+        self._temporizador_vivo.setInterval(MILISEGUNDOS_ANALISIS_EN_VIVO)
+        self._temporizador_vivo.timeout.connect(lambda: self._analizar(en_vivo=True))
 
         self.setWindowTitle(NOMBRE_APLICACION)
         self.resize(1320, 820)
@@ -158,7 +176,14 @@ class VentanaPrincipal(QMainWindow):
         self.accion_guardar_como = self._crear_accion(
             "Guardar como...", "Ctrl+Shift+S", self._guardar_como, "Guardar el documento con otro nombre"
         )
-        self.accion_analizar = self._crear_accion("Analizar", "F5", self._analizar, "Ejecutar el análisis léxico y sintáctico")
+        self.accion_analizar = self._crear_accion(
+            "Analizar", "F5", lambda: self._analizar(), "Ejecutar el análisis léxico y sintáctico"
+        )
+        self.accion_en_vivo = self._crear_accion(
+            "En vivo", "Ctrl+L", self._al_cambiar_modo_en_vivo, "Analizar automáticamente al dejar de escribir"
+        )
+        self.accion_en_vivo.setCheckable(True)
+        self.accion_en_vivo.setChecked(True)
         self.accion_salir = self._crear_accion("Salir", "Ctrl+Q", self.close, "Cerrar la aplicación")
         self.accion_sintaxis = self._crear_accion("Sintaxis soportada", "F1", self._mostrar_sintaxis, "Ver la sintaxis Markdown soportada")
         self.accion_acerca = QAction("Acerca de", self)
@@ -198,7 +223,7 @@ class VentanaPrincipal(QMainWindow):
         menu_archivo.addAction(self.accion_salir)
 
         menu_analisis = self.menuBar().addMenu("A&nálisis")
-        menu_analisis.addAction(self.accion_analizar)
+        menu_analisis.addActions([self.accion_analizar, self.accion_en_vivo])
 
         menu_reportes = self.menuBar().addMenu("&Reportes")
         menu_reportes.addActions([self.accion_documento, self.accion_estadisticas, self.accion_indice])
@@ -216,6 +241,20 @@ class VentanaPrincipal(QMainWindow):
         barra.addSeparator()
         barra.addAction(self.accion_analizar)
         barra.widgetForAction(self.accion_analizar).setObjectName("botonAnalizar")
+        barra.addAction(self.accion_en_vivo)
+
+        etiqueta_profundidad = QLabel("  Anidamiento máx.")
+        etiqueta_profundidad.setObjectName("detallePanel")
+        self.selector_profundidad = QSpinBox()
+        self.selector_profundidad.setRange(1, PROFUNDIDAD_MAXIMA_LIMITE)
+        self.selector_profundidad.setValue(PROFUNDIDAD_MAXIMA_POR_DEFECTO)
+        self.selector_profundidad.setMinimumWidth(56)
+        self.selector_profundidad.setToolTip(
+            "Profundidad máxima de listas y citas antes de mostrar una advertencia"
+        )
+        self.selector_profundidad.valueChanged.connect(self._al_cambiar_profundidad)
+        barra.addWidget(etiqueta_profundidad)
+        barra.addWidget(self.selector_profundidad)
         barra.addSeparator()
         barra.addActions(self._acciones_reportes)
         self.addToolBar(barra)
@@ -263,6 +302,7 @@ class VentanaPrincipal(QMainWindow):
         self.tabla_errores.cellDoubleClicked.connect(lambda fila, _: self._ir_a_fila(self.tabla_errores, fila, 5))
 
         self.pestanas = QTabWidget()
+        self.pestanas.setUsesScrollButtons(False)
         self.pestanas.addTab(self.tabla_tokens, "Tokens")
         self.pestanas.addTab(self.tabla_errores, "Errores")
         self.pestanas.addTab(self.arbol, "Árbol de derivación")
@@ -429,8 +469,15 @@ class VentanaPrincipal(QMainWindow):
     # Analisis
     # ------------------------------------------------------------------
 
-    def _analizar(self) -> None:
-        """Ejecuta el analisis lexico y sintactico y muestra los resultados."""
+    def _analizar(self, en_vivo: bool = False) -> None:
+        """Ejecuta el analisis lexico y sintactico y muestra los resultados.
+
+        Args:
+            en_vivo: True cuando lo dispara el analisis en vivo. En ese caso no
+                se cambia de pestana, para no interrumpir al usuario mientras
+                escribe.
+        """
+        self._temporizador_vivo.stop()
         texto = self.editor.toPlainText()
         try:
             inicio = time.perf_counter()
@@ -453,7 +500,7 @@ class VentanaPrincipal(QMainWindow):
         self.vista_previa.setHtml(GeneradorHTML(raiz).generar_cuerpo())
         self.editor.marcar_lineas_error({error.linea for error in self._errores})
         self.etiqueta_tiempo.setText(f"{milisegundos:.1f} ms")
-        self._actualizar_banner()
+        self._actualizar_banner(cambiar_pestana=not en_vivo)
         self._generar_salidas()
 
     def _generar_salidas(self) -> None:
@@ -517,13 +564,22 @@ class VentanaPrincipal(QMainWindow):
         )
         self._abrir_salida("directorio")
 
-    def _actualizar_banner(self) -> None:
+    def _actualizar_banner(self, cambiar_pestana: bool = True) -> None:
+        """Muestra el resultado del analisis: errores, advertencias o exito."""
+        advertencias = []
+        if self._raiz is not None:
+            advertencias = buscar_anidamiento_excesivo(self._raiz, self.selector_profundidad.value())
+
         if not self._errores:
-            self.banner.setObjectName("bannerExito")
-            self.banner.setText(
-                f"Análisis completado sin errores: {len(self._tokens)} tokens reconocidos."
-            )
-            self.pestanas.setCurrentIndex(PESTANA_TOKENS)
+            texto = f"Análisis completado sin errores: {len(self._tokens)} tokens reconocidos."
+            if advertencias:
+                self.banner.setObjectName("bannerAdvertencia")
+                texto += " " + self._texto_advertencias(advertencias)
+            else:
+                self.banner.setObjectName("bannerExito")
+            self.banner.setText(texto)
+            if cambiar_pestana:
+                self.pestanas.setCurrentIndex(PESTANA_TOKENS)
         else:
             lexicos = sum(1 for error in self._errores if error.fase == Fase.LEXICO)
             sintacticos = len(self._errores) - lexicos
@@ -534,8 +590,32 @@ class VentanaPrincipal(QMainWindow):
                 f"{'error' if total == 1 else 'errores'} ({lexicos} léxicos, {sintacticos} sintácticos). "
                 "Haga doble clic en un error para ubicarlo en el documento."
             )
-            self.pestanas.setCurrentIndex(PESTANA_ERRORES)
+            if cambiar_pestana:
+                self.pestanas.setCurrentIndex(PESTANA_ERRORES)
         self._refrescar_estilo(self.banner)
+
+    def _texto_advertencias(self, advertencias: list[AdvertenciaAnidamiento]) -> str:
+        """Resume las advertencias de anidamiento para el mensaje de resultado."""
+        maximo = self.selector_profundidad.value()
+        detalles = [advertencia.descripcion for advertencia in advertencias[:ADVERTENCIAS_VISIBLES]]
+        restantes = len(advertencias) - ADVERTENCIAS_VISIBLES
+        if restantes > 0:
+            detalles.append(f"y {restantes} más")
+        return (
+            f"Advertencia: se supera la profundidad máxima configurada ({maximo} "
+            f"{'nivel' if maximo == 1 else 'niveles'}): {'; '.join(detalles)}."
+        )
+
+    def _al_cambiar_profundidad(self, _valor: int) -> None:
+        """Recalcula las advertencias con la nueva profundidad maxima."""
+        if self._analisis_vigente:
+            self._actualizar_banner(cambiar_pestana=False)
+
+    def _al_cambiar_modo_en_vivo(self, activo: bool) -> None:
+        estado = "activado" if activo else "desactivado"
+        self.statusBar().showMessage(f"Análisis en vivo {estado}", 4000)
+        if activo and not self._analisis_vigente:
+            self._temporizador_vivo.start()
 
     def _limpiar_resultados(self) -> None:
         self._tokens = []
@@ -560,7 +640,10 @@ class VentanaPrincipal(QMainWindow):
         self._refrescar_estilo(self.banner)
 
     def _al_cambiar_texto(self) -> None:
-        """Marca los resultados como desactualizados cuando se edita el documento."""
+        """Programa el analisis en vivo o marca los resultados como desactualizados."""
+        if self.accion_en_vivo.isChecked():
+            self._temporizador_vivo.start()
+            return
         if self._analisis_vigente:
             self._analisis_vigente = False
             self.editor.marcar_lineas_error(set())

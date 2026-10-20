@@ -23,6 +23,8 @@ EXITO_FONDO = "#E3F4EA"
 ERROR = "#B42318"
 ERROR_FONDO = "#FDECEA"
 ERROR_LINEA = "#FDE2DF"
+ADVERTENCIA = "#8A5A00"
+ADVERTENCIA_FONDO = "#FFF4D6"
 LINEA_ACTUAL = "#F1F5FA"
 
 # Colores del arbol de derivacion (los mismos del enunciado, seccion 4.10)
@@ -57,6 +59,11 @@ QToolBar QToolButton:hover {{
 QToolBar QToolButton:disabled {{
     color: #A0A8B2;
 }}
+QToolBar QToolButton:checked {{
+    background: {ACENTO_SUAVE};
+    border-color: {ACENTO};
+    color: {ACENTO_OSCURO};
+}}
 QToolButton#botonAnalizar {{
     background: {ACENTO};
     color: white;
@@ -88,6 +95,13 @@ QLabel#bannerExito {{
 QLabel#bannerError {{
     background: {ERROR_FONDO};
     color: {ERROR};
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: bold;
+}}
+QLabel#bannerAdvertencia {{
+    background: {ADVERTENCIA_FONDO};
+    color: {ADVERTENCIA};
     border-radius: 6px;
     padding: 8px 12px;
     font-weight: bold;
