@@ -1,9 +1,9 @@
 # Casos de Prueba - MarkdownCheck
 
-**Autor:** Edgar Alessandro Chocon Oliva
-**Carnet:** 202212978
-**Curso:** Lenguajes Formales y de Programacion - Seccion B+
-**Universidad de San Carlos de Guatemala - Facultad de Ingenieria**
+**Autor:** Edgar Alessandro Chocon Oliva\
+**Carnet:** 202212978\
+**Curso:** Lenguajes Formales y de Programacion - Seccion B+\
+**Universidad de San Carlos de Guatemala - Facultad de Ingenieria**\
 **Segundo Semestre 2026**
 
 ---

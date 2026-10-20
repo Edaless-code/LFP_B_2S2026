@@ -1,9 +1,9 @@
 # MarkdownCheck - Analizador Lexico-Sintactico de Markdown a HTML
 
-**Autor:** Edgar Alessandro Chocon Oliva
-**Carnet:** 202212978
-**Curso:** Lenguajes Formales y de Programacion - Seccion B+
-**Universidad de San Carlos de Guatemala - Facultad de Ingenieria**
+**Autor:** Edgar Alessandro Chocon Oliva\
+**Carnet:** 202212978\
+**Curso:** Lenguajes Formales y de Programacion - Seccion B+\
+**Universidad de San Carlos de Guatemala - Facultad de Ingenieria**\
 **Segundo Semestre 2026**
 
 ---
@@ -72,16 +72,30 @@ python main.py examples/ejemplo_valido.md
 1. **Abrir** (Ctrl+O) carga un archivo `.md`; tambien se puede arrastrar el
    archivo a la ventana o escribir directamente en el editor.
 2. **Analizar** (F5) ejecuta el analisis lexico y sintactico.
-3. El panel derecho muestra los resultados en tres pestanas:
+3. El panel derecho muestra los resultados en cuatro pestanas:
 
    | Pestana | Contenido |
    |---|---|
    | Tokens | No., lexema, tipo, linea y columna de cada token |
    | Errores | No., lexema, tipo, fase, descripcion, linea y columna |
    | Arbol de derivacion | Arbol construido por el parser, con no terminales y terminales diferenciados |
+   | Vista previa | El documento traducido a HTML |
 
 4. Doble clic en un token, un error o una hoja del arbol ubica el cursor en esa
    posicion del documento. Las lineas con error se resaltan en el editor.
+5. Los botones de reportes (o el menu **Reportes**) abren en el navegador los
+   archivos generados en `salidas/<nombre del archivo>/`:
+
+   | Archivo | Contenido |
+   |---|---|
+   | `reporte1_documento.html` | Documento traducido a HTML |
+   | `reporte2_estadisticas.html` | Estadisticas del documento |
+   | `reporte3_indice.html` | Tabla de contenido con enlaces al Reporte 1 |
+   | `arbol.dot` (y `arbol.svg` si Graphviz esta instalado) | Arbol de derivacion |
+   | `reporte_errores.html` | Tabla de errores, solo cuando el analisis tiene errores |
+
+   Los reportes 1, 2 y 3 se generan unicamente cuando el analisis termina sin
+   errores.
 
 ## Pruebas
 
@@ -105,15 +119,22 @@ Proyecto2/
 │   ├── reportes/            GeneradorHTML, estadisticas, indice y arbol.dot
 │   └── interfaz/            VentanaPrincipal, editor con numeros de linea y tema
 ├── tests/                   Pruebas unitarias
-├── examples/                Archivos .md de entrada
+├── examples/                Archivos .md de entrada (ejemplo del enunciado y 13 casos de prueba)
 ├── docs/                    Manual tecnico, manual de usuario y casos de prueba
 └── salidas/                 Reportes HTML y arbol.dot generados
 ```
 
 ## Documentacion
 
-- [Manual tecnico](docs/MANUAL_TECNICO.md): arquitectura, tokens, AFD, gramatica
-  libre de contexto y estrategia de recuperacion de errores.
+- [Manual tecnico](docs/MANUAL_TECNICO.md): arquitectura, diagrama de clases,
+  tokens, AFD, gramatica libre de contexto, arbol de derivacion, reportes y
+  estrategia de recuperacion de errores.
+- [Manual de usuario](docs/MANUAL_USUARIO.md): instalacion, uso de la interfaz,
+  sintaxis soportada, interpretacion de las tablas y de los reportes.
+- [Casos de prueba](docs/CASOS_PRUEBA.md): 14 casos con entrada, resultado
+  esperado y resultado obtenido.
+
+Los tres documentos tambien estan en PDF en la carpeta `docs/`.
 
 ## Estado del desarrollo
 
@@ -122,4 +143,4 @@ Proyecto2/
 | 1 | Estructura, modelos base, gramatica y AFD | Completada |
 | 2 | Analizador lexico (AFD) y gestor de errores | Completada |
 | 3 | Parser descendente recursivo e interfaz grafica | Completada |
-| 4 | Reportes, pruebas y documentacion | Pendiente |
+| 4 | Reportes, pruebas y documentacion | Completada |
