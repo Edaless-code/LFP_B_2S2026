@@ -20,14 +20,26 @@ from modelos.token import Token
 
 # PRIMERO(<parrafo>): tokens que inician contenido en linea
 PRIMERO_EN_LINEA = frozenset(
-    {TipoToken.TEXTO, TipoToken.NEGRITA, TipoToken.CURSIVA, TipoToken.CODIGO_INLINE}
+    {
+        TipoToken.TEXTO,
+        TipoToken.NEGRITA,
+        TipoToken.CURSIVA,
+        TipoToken.TACHADO,
+        TipoToken.CODIGO_INLINE,
+        TipoToken.CORCHETE_ABRE,
+        TipoToken.IMAGEN_ABRE,
+    }
 )
+
+# Marcadores de item: VIÑETA (lista no ordenada) o ENUMERADOR (lista ordenada)
+MARCADORES_LISTA = frozenset({TipoToken.VINETA, TipoToken.ENUMERADOR})
 
 # PRIMERO(<bloque>): union disjunta de los PRIMERO de sus siete alternativas
 PRIMERO_BLOQUE = PRIMERO_EN_LINEA | frozenset(
     {
         TipoToken.NUMERAL,
         TipoToken.VINETA,
+        TipoToken.ENUMERADOR,
         TipoToken.CITA,
         TipoToken.CERCA_CODIGO,
         TipoToken.REGLA_HORIZONTAL,
@@ -157,7 +169,7 @@ class AnalizadorSintactico:
             nodo.agregar_hijo(self.encabezado())
         elif tipo in PRIMERO_EN_LINEA:
             nodo.agregar_hijo(self.parrafo())
-        elif tipo == TipoToken.VINETA:
+        elif tipo in MARCADORES_LISTA:
             nodo.agregar_hijo(self.lista())
         elif tipo == TipoToken.CITA:
             nodo.agregar_hijo(self.cita(1))
@@ -202,24 +214,29 @@ class AnalizadorSintactico:
     # ------------------------------------------------------------------
 
     def lista(self) -> NodoAST:
-        """<lista> ::= <item_lista> { <item_lista> }
+        """<lista>(m) ::= <item_lista>(m) { <item_lista>(m) }
 
-        Todos los items de una lista deben tener la misma sangria que el
+        El marcador m (VIÑETA u ENUMERADOR) lo fija el primer item: una lista
+        no ordenada termina cuando aparece un ENUMERADOR en el mismo nivel, y
+        viceversa. Todos los items deben tener la misma sangria que el
         primero; si no, se reporta INDENTACION_INVALIDA y el item se acepta
         en esta lista.
         """
         nodo = NodoAST.no_terminal("lista")
+        marcador = self._actual.tipo
         sangria_lista = self._actual.sangria
-        while self._actual.tipo == TipoToken.VINETA:
+        while self._actual.tipo == marcador:
             if self._actual.sangria != sangria_lista:
                 self._reportar_indentacion(self._actual)
             nodo.agregar_hijo(self.item_lista())
         return nodo
 
     def item_lista(self) -> NodoAST:
-        """<item_lista> ::= VIÑETA <en_linea>(∅) SALTO_LINEA [ <sublista> ]"""
+        """<item_lista>(m) ::= m [ CASILLA ] <en_linea>(∅) SALTO_LINEA [ <sublista> ]"""
         nodo = NodoAST.no_terminal("item_lista")
         vineta = self._consumir(nodo)
+        if self._actual.tipo == TipoToken.CASILLA:
+            self._consumir(nodo)
         nodo.agregar_hijo(self.en_linea(SIN_DELIMITADORES_ABIERTOS))
         self._esperar(TipoToken.SALTO_LINEA, nodo)
         if self._actual.tipo == TipoToken.INDENT:
@@ -227,10 +244,12 @@ class AnalizadorSintactico:
         return nodo
 
     def sublista(self, sangria_padre: int) -> NodoAST:
-        """<sublista> ::= INDENT <lista> DEDENT
+        """<sublista> ::= INDENT <lista> { <lista> } DEDENT
 
         Una sublista debe estar exactamente un nivel (2 espacios) a la
-        derecha del item que la contiene.
+        derecha del item que la contiene. Puede contener varias listas
+        seguidas si cambia el tipo de marcador (por ejemplo, items con
+        vineta seguidos de items numerados).
 
         Args:
             sangria_padre: Sangria de la vineta del item contenedor.
@@ -238,12 +257,12 @@ class AnalizadorSintactico:
         nodo = NodoAST.no_terminal("sublista")
         self._consumir(nodo)
 
-        if self._actual.tipo == TipoToken.VINETA:
+        if self._actual.tipo not in MARCADORES_LISTA:
+            self._reportar(TipoError.TOKEN_INESPERADO, self._actual)
+        while self._actual.tipo in MARCADORES_LISTA:
             if self._actual.sangria != sangria_padre + ESPACIOS_POR_NIVEL:
                 self._reportar_indentacion(self._actual)
             nodo.agregar_hijo(self.lista())
-        else:
-            self._reportar(TipoError.TOKEN_INESPERADO, self._actual)
 
         self._esperar(TipoToken.DEDENT, nodo)
         return nodo
@@ -342,7 +361,8 @@ class AnalizadorSintactico:
     # ------------------------------------------------------------------
 
     def en_linea(self, abiertos: frozenset) -> NodoAST:
-        """<en_linea>(A) ::= { <negrita>(A) | <cursiva>(A) | <codigo_inline> | TEXTO }
+        """<en_linea>(A) ::= { <negrita>(A) | <cursiva>(A) | <tachado>(A) | <codigo_inline>
+                             | <enlace> | <imagen> | TEXTO }
 
         Args:
             abiertos: Conjunto A de delimitadores abiertos por las producciones
@@ -361,6 +381,12 @@ class AnalizadorSintactico:
                 nodo.agregar_hijo(self.negrita(abiertos))
             elif tipo == TipoToken.CURSIVA and TipoToken.CURSIVA not in abiertos:
                 nodo.agregar_hijo(self.cursiva(abiertos))
+            elif tipo == TipoToken.TACHADO and TipoToken.TACHADO not in abiertos:
+                nodo.agregar_hijo(self.tachado(abiertos))
+            elif tipo == TipoToken.CORCHETE_ABRE:
+                nodo.agregar_hijo(self.enlace())
+            elif tipo == TipoToken.IMAGEN_ABRE:
+                nodo.agregar_hijo(self.imagen())
             else:
                 return nodo
 
@@ -378,6 +404,38 @@ class AnalizadorSintactico:
         self._consumir(nodo)
         nodo.agregar_hijo(self.en_linea(abiertos | {TipoToken.CURSIVA}))
         self._esperar(TipoToken.CURSIVA, nodo)
+        return nodo
+
+    def tachado(self, abiertos: frozenset) -> NodoAST:
+        """<tachado>(A) ::= TACHADO <en_linea>(A ∪ {TACHADO}) TACHADO"""
+        nodo = NodoAST.no_terminal("tachado")
+        self._consumir(nodo)
+        nodo.agregar_hijo(self.en_linea(abiertos | {TipoToken.TACHADO}))
+        self._esperar(TipoToken.TACHADO, nodo)
+        return nodo
+
+    def enlace(self) -> NodoAST:
+        """<enlace> ::= CORCHETE_ABRE <en_linea>(∅) CORCHETE_CIERRA URL
+
+        El texto del enlace es un contexto en linea independiente: el
+        analizador lexico lo tokeniza con su propia pila de delimitadores, por
+        lo que empieza sin delimitadores abiertos.
+        """
+        nodo = NodoAST.no_terminal("enlace")
+        self._consumir(nodo)
+        nodo.agregar_hijo(self.en_linea(SIN_DELIMITADORES_ABIERTOS))
+        if self._esperar(TipoToken.CORCHETE_CIERRA, nodo):
+            self._esperar(TipoToken.URL, nodo)
+        return nodo
+
+    def imagen(self) -> NodoAST:
+        """<imagen> ::= IMAGEN_ABRE [ TEXTO ] CORCHETE_CIERRA URL"""
+        nodo = NodoAST.no_terminal("imagen")
+        self._consumir(nodo)
+        if self._actual.tipo == TipoToken.TEXTO:
+            self._consumir(nodo)
+        if self._esperar(TipoToken.CORCHETE_CIERRA, nodo):
+            self._esperar(TipoToken.URL, nodo)
         return nodo
 
     def codigo_inline(self) -> NodoAST:
