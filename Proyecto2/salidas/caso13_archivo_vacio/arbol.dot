@@ -1,0 +1,10 @@
+digraph ArbolDerivacion {
+    rankdir=TB;
+    node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10];
+    edge [color="#7B8794"];
+
+    n0 [label="<documento>", fillcolor="#2E75B6", fontcolor=white];
+    n1 [label="FIN_ARCHIVO", fillcolor="#F9E79F"];
+
+    n0 -> n1;
+}

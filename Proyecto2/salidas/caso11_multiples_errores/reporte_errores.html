@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>caso11_multiples_errores.md - Errores</title>
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: #F4F6F9;
+    color: #1F2933;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+}
+nav {
+    background: #FFFFFF;
+    border-bottom: 1px solid #DDE2E8;
+    padding: 10px 24px;
+    font-size: 13px;
+}
+nav a { color: #2E75B6; text-decoration: none; margin-right: 18px; }
+nav a:hover { text-decoration: underline; }
+nav a.actual { color: #1F2933; font-weight: 700; }
+.contenedor {
+    max-width: 880px;
+    margin: 28px auto;
+    background: #FFFFFF;
+    border: 1px solid #DDE2E8;
+    border-radius: 10px;
+    padding: 32px 44px 40px;
+}
+.titulo-reporte { margin: 0; font-size: 24px; }
+.subtitulo { margin: 2px 0 24px; color: #616E7C; font-size: 13px; }
+.insignia {
+    display: inline-block;
+    background: #E3F4EA;
+    color: #1E7B43;
+    border: 1px solid #B7E1C6;
+    border-radius: 999px;
+    padding: 2px 12px;
+    font-size: 12px;
+    margin-bottom: 18px;
+}
+.insignia.error { background: #FDECEA; color: #B42318; border-color: #F5C2BC; }
+.nota { color: #616E7C; font-size: 12px; font-style: italic; margin-top: 18px; }
+h2.seccion {
+    font-size: 15px;
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #DDE2E8;
+}
+
+/* Reporte 1: documento renderizado */
+.documento h1, .documento h2 { border-bottom: 1px solid #E4E7EB; padding-bottom: 6px; }
+.documento h1 { font-size: 28px; }
+.documento h2 { font-size: 22px; margin-top: 28px; }
+.documento code {
+    background: #EEF1F4;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px;
+}
+.documento pre {
+    background: #111827;
+    color: #E5E7EB;
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+}
+.documento pre code { background: none; color: inherit; padding: 0; }
+.documento blockquote {
+    margin: 12px 0;
+    padding: 2px 16px;
+    border-left: 4px solid #CBD2D9;
+    color: #52606D;
+}
+.documento blockquote p { margin: 6px 0; }
+.documento hr { border: none; border-top: 1px solid #DDE2E8; margin: 24px 0; }
+.documento ul { padding-left: 26px; }
+.documento li { margin: 2px 0; }
+
+/* Reporte 2: estadisticas */
+.tarjetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.tarjeta {
+    background: #F8FAFC;
+    border: 1px solid #DDE2E8;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.tarjeta .valor { font-size: 28px; font-weight: 700; color: #2E75B6; line-height: 1.2; }
+.tarjeta .etiqueta { color: #616E7C; font-size: 12px; }
+.barras { width: 100%; border-collapse: collapse; }
+.barras td { padding: 4px 0; font-size: 12px; }
+.barras .nivel { width: 36px; font-weight: 700; color: #616E7C; }
+.barras .cantidad { width: 36px; text-align: right; color: #616E7C; }
+.pista { background: #EEF1F4; border-radius: 4px; height: 12px; margin: 0 12px; }
+.relleno { background: #2E75B6; border-radius: 4px; height: 12px; }
+.pares { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.par {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #DDE2E8;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #616E7C;
+}
+.par strong { font-size: 20px; color: #1F2933; }
+.par strong.listas { color: #7C3AED; }
+.par strong.citas { color: #B7791F; }
+
+/* Reporte 3: indice */
+.indice {
+    background: #F8FAFC;
+    border: 1px solid #DDE2E8;
+    border-radius: 8px;
+    padding: 12px 20px;
+}
+.entrada { padding: 7px 0; border-bottom: 1px dashed #DDE2E8; }
+.entrada:last-child { border-bottom: none; }
+.entrada a { color: #2E75B6; text-decoration: none; }
+.entrada a:hover { text-decoration: underline; }
+.entrada.n1 a { font-weight: 700; font-size: 15px; }
+.nivel-h {
+    display: inline-block;
+    min-width: 26px;
+    background: #2E75B6;
+    color: #FFFFFF;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+    padding: 1px 4px;
+    margin-right: 8px;
+}
+.vacio {
+    background: #FFF8E6;
+    border: 1px solid #F3D58A;
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: #7A5B00;
+}
+
+/* Reporte de errores */
+table.errores { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.errores th {
+    text-align: left;
+    background: #F4F6F9;
+    color: #616E7C;
+    padding: 8px;
+    border-bottom: 1px solid #DDE2E8;
+}
+table.errores td { padding: 8px; border-bottom: 1px solid #EEF1F4; vertical-align: top; }
+table.errores td.tipo { color: #B42318; font-weight: 600; }
+table.errores td.numero { text-align: right; }
+</style>
+</head>
+<body>
+<main class="contenedor">
+<h1 class="titulo-reporte">Tabla de Errores</h1>
+<p class="subtitulo">caso11_multiples_errores.md</p>
+<div class="insignia error">7 errores encontrados</div>
+<table class="errores"><tr><th>No.</th><th>Lexema</th><th>Tipo</th><th>Fase</th><th>Descripción</th><th>Línea</th><th>Columna</th></tr><tr><td class="numero">1</td><td><code>#######</code></td><td class="tipo">ENCABEZADO_INVALIDO</td><td>Léxico</td><td>Encabezado inválido en línea 1: máximo 6 niveles</td><td class="numero">1</td><td class="numero">1</td></tr><tr><td class="numero">2</td><td><code>**</code></td><td class="tipo">NEGRITA_SIN_CERRAR</td><td>Léxico</td><td>Negrita sin cerrar iniciada en línea 3, columna 13</td><td class="numero">3</td><td class="numero">13</td></tr><tr><td class="numero">3</td><td><code>*</code></td><td class="tipo">CURSIVA_SIN_CERRAR</td><td>Léxico</td><td>Cursiva sin cerrar iniciada en línea 5, columna 13</td><td class="numero">5</td><td class="numero">13</td></tr><tr><td class="numero">4</td><td><code>`</code></td><td class="tipo">CODIGO_INLINE_SIN_CERRAR</td><td>Léxico</td><td>Código en línea sin cerrar iniciado en línea 7, columna 13</td><td class="numero">7</td><td class="numero">13</td></tr><tr><td class="numero">5</td><td><code>-</code></td><td class="tipo">INDENTACION_INVALIDA</td><td>Sintáctico</td><td>Indentación inválida en línea 10, columna 5</td><td class="numero">10</td><td class="numero">5</td></tr><tr><td class="numero">6</td><td><code>&gt;</code></td><td class="tipo">CITA_MAL_FORMADA</td><td>Sintáctico</td><td>Cita mal formada en línea 12, columna 1</td><td class="numero">12</td><td class="numero">1</td></tr><tr><td class="numero">7</td><td><code>```</code></td><td class="tipo">BLOQUE_CODIGO_SIN_CERRAR</td><td>Léxico</td><td>Bloque de código sin cerrar iniciado en línea 14</td><td class="numero">14</td><td class="numero">1</td></tr></table>
+<p class="nota">Los reportes 1, 2 y 3 se generan únicamente cuando el análisis termina sin errores.</p>
+</main>
+</body>
+</html>
