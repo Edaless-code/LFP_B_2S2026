@@ -1,0 +1,181 @@
+// AFD del analizador lexico de MarkdownCheck.
+// Generar la imagen con:  dot -Tpng afd.dot -o afd.png
+//
+// Convenciones:
+//   doble circulo      estado de aceptacion (indica el token que reconoce)
+//   octagono rojo      estado de error lexico
+//   flecha continua    transicion por caracter
+//   punto de entrada   estado inicial de cada contexto (sub-automata)
+//   "otro"             cualquier caracter no listado en las demas transiciones del estado
+//   esp                espacio o tabulacion
+//   T (conector)       mismo estado T del contexto en linea, dibujado de nuevo para no cruzar el diagrama
+
+digraph AFD {
+    rankdir=LR;
+    newrank=true;
+    nodesep=0.35;
+    ranksep=0.55;
+    fontname="Arial";
+    node [fontname="Arial", fontsize=10, shape=circle, style=filled, fillcolor="#FFFFFF"];
+    edge [fontname="Arial", fontsize=9];
+
+    inicio [shape=point, width=0.12];
+    inicio -> S0;
+
+    subgraph cluster_inicio {
+        label="Contexto: inicio de linea (marcadores de bloque)";
+        style="rounded,filled"; fillcolor="#F4F8FC"; color="#2E75B6"; fontsize=11;
+
+        S0  [label="S0\nINICIO_LINEA", fillcolor="#D6EAF8"];
+        S1  [label="S1\nSALTO_PARRAFO", shape=doublecircle, fillcolor="#F9E79F"];
+
+        H1  [label="H1"]; H2 [label="H2"]; H3 [label="H3"];
+        H4  [label="H4"]; H5 [label="H5"]; H6 [label="H6"];
+        H7  [label="H7\nEXCESO"];
+        NUM [label="NUMERAL", shape=doublecircle, fillcolor="#F9E79F"];
+        EH  [label="ENCABEZADO\nINVALIDO", shape=octagon, fillcolor="#F5B7B1"];
+
+        C1  [label="C1\nCITA", shape=doublecircle, fillcolor="#F9E79F"];
+        C2  [label="C2\nCITA_ESP", shape=doublecircle, fillcolor="#F9E79F"];
+
+        A1  [label="A1\nCODIGO_INLINE", shape=doublecircle, fillcolor="#F9E79F"];
+        A2  [label="A2"];
+        F1  [label="F1\nCERCA_CODIGO", shape=doublecircle, fillcolor="#F9E79F"];
+        LG  [label="LG\nLENGUAJE", shape=doublecircle, fillcolor="#F9E79F"];
+
+        G1  [label="G1"];
+        G2  [label="G2"];
+        G3  [label="G3"];
+        G4  [label="G4"];
+        RH  [label="REGLA\nHORIZONTAL", shape=doublecircle, fillcolor="#F9E79F"];
+
+        AS  [label="AS\nCURSIVA", shape=doublecircle, fillcolor="#F9E79F"];
+        MS  [label="MS"];
+        VI  [label="VIÑETA", shape=doublecircle, fillcolor="#F9E79F"];
+        TX  [label="T\nTEXTO\n(conector)", shape=doublecircle, style="filled,dashed", fillcolor="#FCF3CF"];
+    }
+
+    subgraph cluster_linea {
+        label="Contexto: contenido en linea";
+        style="rounded,filled"; fillcolor="#F6FBF4"; color="#3A8E3A"; fontsize=11;
+
+        E0  [label="E0\nEN_LINEA", fillcolor="#D5F5E3"];
+        T   [label="T\nTEXTO", shape=doublecircle, fillcolor="#F9E79F"];
+        I1  [label="I1\nCURSIVA", shape=doublecircle, fillcolor="#F9E79F"];
+        N2  [label="N2\nNEGRITA", shape=doublecircle, fillcolor="#F9E79F"];
+        K1  [label="K1\nCODIGO_INLINE", shape=doublecircle, fillcolor="#F9E79F"];
+        SL  [label="SL\nSALTO_LINEA", shape=doublecircle, fillcolor="#F9E79F"];
+    }
+
+    subgraph cluster_literal_linea {
+        label="Contexto: literal de codigo en linea";
+        style="rounded,filled"; fillcolor="#FDF6EC"; color="#B9770E"; fontsize=11;
+
+        LI  [label="LI\nTEXTO_LITERAL", shape=doublecircle, fillcolor="#F9E79F"];
+        K2  [label="K2\nCODIGO_INLINE\n(cierre)", shape=doublecircle, fillcolor="#F9E79F"];
+        EI  [label="CODIGO_INLINE\nSIN_CERRAR", shape=octagon, fillcolor="#F5B7B1"];
+    }
+
+    subgraph cluster_literal_bloque {
+        label="Contexto: literal de bloque de codigo";
+        style="rounded,filled"; fillcolor="#FBF1F8"; color="#8E44AD"; fontsize=11;
+
+        B0  [label="B0\nINICIO_LINEA\nLITERAL", fillcolor="#E8DAEF"];
+        B1  [label="B1"];
+        B2  [label="B2"];
+        B3  [label="B3\nCERCA_CODIGO\n(cierre)", shape=doublecircle, fillcolor="#F9E79F"];
+        B4  [label="B4\nLINEA\nLITERAL"];
+        EB  [label="BLOQUE_CODIGO\nSIN_CERRAR", shape=octagon, fillcolor="#F5B7B1"];
+    }
+
+    // ---------------- Inicio de linea ----------------
+    S0 -> S0  [label="esp\n(cuenta indentacion)"];
+    S0 -> S1  [label="\\n"];
+    S1 -> S1  [label="esp, \\n"];
+    S0 -> H1  [label="#"];
+    S0 -> C1  [label=">"];
+    S0 -> A1  [label="`"];
+    S0 -> G1  [label="-"];
+    S0 -> AS  [label="*"];
+    S0 -> MS  [label="+"];
+    S0 -> TX  [label="otro"];
+
+    // Encabezados: un estado por cada cantidad de # (maximo 6)
+    H1 -> H2  [label="#"]; H2 -> H3 [label="#"]; H3 -> H4 [label="#"];
+    H4 -> H5  [label="#"]; H5 -> H6 [label="#"]; H6 -> H7 [label="#"];
+    H7 -> H7  [label="#"];
+    H1 -> NUM [label="esp"]; H2 -> NUM [label="esp"]; H3 -> NUM [label="esp"];
+    H4 -> NUM [label="esp"]; H5 -> NUM [label="esp"]; H6 -> NUM [label="esp"];
+    H7 -> EH  [label="esp"];
+    H1 -> TX  [label="otro"]; H2 -> TX [label="otro"]; H3 -> TX [label="otro"];
+    H4 -> TX  [label="otro"]; H5 -> TX [label="otro"]; H6 -> TX [label="otro"];
+    H7 -> TX  [label="otro"];
+
+    // Citas: '>' repetido, con o sin un espacio entre cada simbolo
+    C1 -> C1  [label=">"];
+    C1 -> C2  [label="esp"];
+    C2 -> C1  [label=">"];
+
+    // Acento grave: codigo en linea o cerca de bloque de codigo
+    A1 -> A2  [label="`"];
+    A2 -> F1  [label="`"];
+    F1 -> LG  [label="otro\n(tras esp)"];
+    LG -> LG  [label="otro"];
+
+    // Guion: vineta, regla horizontal o texto
+    G1 -> VI  [label="esp"];
+    G1 -> G2  [label="-"];
+    G1 -> TX  [label="otro"];
+    G2 -> G3  [label="-"];
+    G2 -> TX  [label="otro"];
+    G3 -> G3  [label="-"];
+    G3 -> G4  [label="esp"];
+    G3 -> RH  [label="\\n (se devuelve)"];
+    G3 -> TX  [label="otro"];
+    G4 -> G4  [label="esp"];
+    G4 -> RH  [label="\\n (se devuelve)"];
+    G4 -> TX  [label="otro"];
+
+    // Asterisco y signo mas al inicio de linea
+    AS -> VI  [label="esp"];
+    AS -> N2  [label="*"];
+    MS -> VI  [label="esp"];
+    MS -> TX  [label="otro"];
+
+    // ---------------- Contenido en linea ----------------
+    E0 -> I1  [label="*"];
+    I1 -> N2  [label="*"];
+    E0 -> K1  [label="`"];
+    E0 -> SL  [label="\\n (fin de bloque)"];
+    E0 -> T   [label="otro"];
+    T  -> T   [label="otro\n\\n (continua parrafo)"];
+
+    // ---------------- Literal de codigo en linea ----------------
+    LI -> LI  [label="otro"];
+    LI -> K2  [label="`"];
+    K1 -> K2  [label="`"];
+    LI -> EI  [label="fin de bloque"];
+
+    // ---------------- Literal de bloque de codigo ----------------
+    B0 -> B0  [label="esp, \\n"];
+    B0 -> B1  [label="`"];
+    B0 -> B4  [label="otro"];
+    B1 -> B2  [label="`"];
+    B1 -> B4  [label="otro"];
+    B2 -> B3  [label="`"];
+    B2 -> B4  [label="otro"];
+    B4 -> B4  [label="otro"];
+    B4 -> B0  [label="\\n"];
+    B0 -> EB  [label="EOF"];
+    B4 -> EB  [label="EOF"];
+
+    // ---------------- Entradas a cada contexto ----------------
+    // El cambio de contexto ocurre despues de emitir un token; la tabla
+    // completa de cambios de contexto esta en el manual tecnico, seccion 3.3.
+    entrada_linea   [shape=point, width=0.12];
+    entrada_literal [shape=point, width=0.12];
+    entrada_bloque  [shape=point, width=0.12];
+    entrada_linea   -> E0 [label="tras un marcador\nde bloque"];
+    entrada_literal -> LI [label="tras CODIGO_INLINE\nde apertura"];
+    entrada_bloque  -> B0 [label="tras CERCA_CODIGO\nde apertura"];
+}

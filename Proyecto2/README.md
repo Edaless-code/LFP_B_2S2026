@@ -79,11 +79,16 @@ Proyecto2/
 └── salidas/                 Reportes HTML y arbol.dot generados
 ```
 
+## Documentacion
+
+- [Manual tecnico](docs/MANUAL_TECNICO.md): arquitectura, tokens, AFD, gramatica
+  libre de contexto y estrategia de recuperacion de errores.
+
 ## Estado del desarrollo
 
 | Fase | Contenido | Estado |
 |---|---|---|
-| 1 | Estructura, modelos base y gramatica | En progreso |
+| 1 | Estructura, modelos base, gramatica y AFD | Completada |
 | 2 | Analizador lexico (AFD) | Pendiente |
 | 3 | Parser descendente recursivo e interfaz grafica | Pendiente |
 | 4 | Reportes, pruebas y documentacion | Pendiente |
