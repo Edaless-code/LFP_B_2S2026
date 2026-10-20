@@ -346,7 +346,7 @@ class PruebasCasosBorde(unittest.TestCase):
         )
 
     def test_marca_bom(self):
-        tokens, _ = tokenizar("﻿# A\n")
+        tokens, _ = tokenizar("\ufeff# A\n")
         self.assertEqual((tokens[0].tipo, tokens[0].columna), (T.NUMERAL, 1))
 
     def test_lineas_en_blanco_consecutivas(self):

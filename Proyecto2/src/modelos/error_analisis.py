@@ -3,7 +3,8 @@
 Los tipos de error y los mensajes corresponden a la seccion 4.9 del enunciado.
 Se agrega TOKEN_INESPERADO para los casos sintacticos que no encajan en
 ninguna de las categorias anteriores, de modo que el parser siempre pueda
-reportar con precision lo que encontro.
+reportar con precision lo que encontro, y TACHADO_SIN_CERRAR para el texto
+tachado del alcance opcional.
 """
 
 from enum import Enum
@@ -25,6 +26,7 @@ class TipoError(str, Enum):
     NEGRITA_SIN_CERRAR = "NEGRITA_SIN_CERRAR"
     CURSIVA_SIN_CERRAR = "CURSIVA_SIN_CERRAR"
     CODIGO_INLINE_SIN_CERRAR = "CODIGO_INLINE_SIN_CERRAR"
+    TACHADO_SIN_CERRAR = "TACHADO_SIN_CERRAR"
     BLOQUE_CODIGO_SIN_CERRAR = "BLOQUE_CODIGO_SIN_CERRAR"
     ENCABEZADO_INVALIDO = "ENCABEZADO_INVALIDO"
     INDENTACION_INVALIDA = "INDENTACION_INVALIDA"
@@ -39,6 +41,7 @@ FASE_POR_TIPO: dict[TipoError, Fase] = {
     TipoError.NEGRITA_SIN_CERRAR: Fase.LEXICO,
     TipoError.CURSIVA_SIN_CERRAR: Fase.LEXICO,
     TipoError.CODIGO_INLINE_SIN_CERRAR: Fase.LEXICO,
+    TipoError.TACHADO_SIN_CERRAR: Fase.LEXICO,
     TipoError.BLOQUE_CODIGO_SIN_CERRAR: Fase.LEXICO,
     TipoError.ENCABEZADO_INVALIDO: Fase.LEXICO,
     TipoError.INDENTACION_INVALIDA: Fase.SINTACTICO,
@@ -53,6 +56,8 @@ PLANTILLAS_MENSAJE: dict[TipoError, str] = {
         "Cursiva sin cerrar iniciada en línea {linea}, columna {columna}",
     TipoError.CODIGO_INLINE_SIN_CERRAR:
         "Código en línea sin cerrar iniciado en línea {linea}, columna {columna}",
+    TipoError.TACHADO_SIN_CERRAR:
+        "Tachado sin cerrar iniciado en línea {linea}, columna {columna}",
     TipoError.BLOQUE_CODIGO_SIN_CERRAR:
         "Bloque de código sin cerrar iniciado en línea {linea}",
     TipoError.ENCABEZADO_INVALIDO:

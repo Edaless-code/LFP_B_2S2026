@@ -23,11 +23,20 @@ class TipoToken(str, Enum):
         SALTO_LINEA: fin de una linea no vacia; delimita el contenido en
             linea de encabezados, items de lista y citas.
         FIN_ARCHIVO: marca el final de la entrada para el parser.
+
+    Tokens del alcance opcional (seccion 4.2 del enunciado):
+        ENUMERADOR: marcador de lista ordenada ("1.").
+        CASILLA: casilla de una lista de tareas ("[ ]" o "[x]").
+        TACHADO: delimitador de texto tachado ("~~").
+        CORCHETE_ABRE, IMAGEN_ABRE, CORCHETE_CIERRA, URL: partes de un
+            enlace [texto](url) o de una imagen ![alt](url).
     """
 
     # Marcadores de bloque (solo validos al inicio de linea)
     NUMERAL = "NUMERAL"
     VINETA = "VIÑETA"
+    ENUMERADOR = "ENUMERADOR"
+    CASILLA = "CASILLA"
     CITA = "CITA"
     CERCA_CODIGO = "CERCA_CODIGO"
     REGLA_HORIZONTAL = "REGLA_HORIZONTAL"
@@ -40,6 +49,13 @@ class TipoToken(str, Enum):
     NEGRITA = "NEGRITA"
     CURSIVA = "CURSIVA"
     CODIGO_INLINE = "CODIGO_INLINE"
+    TACHADO = "TACHADO"
+
+    # Enlaces e imagenes
+    CORCHETE_ABRE = "CORCHETE_ABRE"
+    IMAGEN_ABRE = "IMAGEN_ABRE"
+    CORCHETE_CIERRA = "CORCHETE_CIERRA"
+    URL = "URL"
 
     # Contenido
     TEXTO = "TEXTO"

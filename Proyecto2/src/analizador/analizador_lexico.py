@@ -4,8 +4,10 @@ Recorre el texto caracter a caracter siguiendo los estados documentados en
 docs/MANUAL_TECNICO.md, seccion 3. No utiliza el modulo re.
 
 El AFD se divide en cuatro contextos:
-    inicio de linea        estados S0, S1, H1-H7, C1-C2, A1-A2, F1, LG, G1-G4, AS, MS
-    contenido en linea     estados E0, T, I1, N2, K1, SL
+    inicio de linea        estados S0, S1, H1-H7, C1-C2, A1-A2, F1, LG, G1-G4, AS, MS,
+                           D1-D2 (lista ordenada) y X1-X3 (casilla de tarea)
+    contenido en linea     estados E0, T, I1, N2, K1, SL, V1-V2 (tachado),
+                           P1-P3 (enlace), M1 (imagen) y U1-U2 (url)
     literal en linea       estados LI, K2
     literal de bloque      estados B0-B4
 
@@ -26,17 +28,26 @@ ESPACIO = " "
 TABULACION = "\t"
 SALTO = "\n"
 RETORNO = "\r"
-MARCA_BOM = "﻿"
+MARCA_BOM = "\ufeff"
 NUMERAL = "#"
 MAYOR_QUE = ">"
 GUION = "-"
 ASTERISCO = "*"
 MAS = "+"
 ACENTO_GRAVE = "`"
+VIRGULILLA = "~"
+CORCHETE_ABRE = "["
+CORCHETE_CIERRA = "]"
+PARENTESIS_ABRE = "("
+PARENTESIS_CIERRA = ")"
+EXCLAMACION = "!"
+PUNTO = "."
+MARCAS_CASILLA = (ESPACIO, "x", "X")
 
 MAXIMO_NIVEL_ENCABEZADO = 6
 MINIMO_GUIONES_REGLA = 3
 LONGITUD_CERCA = 3
+MAXIMO_DIGITOS_ENUMERADOR = 9
 ANCHO_TABULACION = 2  # una tabulacion equivale a un nivel de lista
 
 # Clases de linea que reconoce el contexto de inicio de linea
@@ -47,12 +58,34 @@ LINEA_CITA = "cita"
 LINEA_CODIGO = "codigo"
 LINEA_REGLA = "regla"
 LINEA_VINETA = "vineta"
+LINEA_ENUMERADA = "enumerada"
 LINEA_PARRAFO = "parrafo"
 
 
 def es_espacio(caracter: str) -> bool:
     """Clase 'esp' del alfabeto: espacio o tabulacion."""
     return caracter == ESPACIO or caracter == TABULACION
+
+
+def es_digito(caracter: str) -> bool:
+    """Clase 'digito' del alfabeto: 0 a 9."""
+    return "0" <= caracter <= "9"
+
+
+class Enlace:
+    """Posiciones de un enlace [texto](url) o de una imagen ![alt](url) en un bloque.
+
+    Attributes:
+        es_imagen: True si el enlace va precedido de '!'.
+        inicio_texto, fin_texto: Rango [inicio, fin) del texto entre corchetes.
+        fin_url: Posicion del parentesis de cierre.
+    """
+
+    def __init__(self, es_imagen: bool, inicio_texto: int, fin_texto: int, fin_url: int) -> None:
+        self.es_imagen = es_imagen
+        self.inicio_texto = inicio_texto
+        self.fin_texto = fin_texto
+        self.fin_url = fin_url
 
 
 class InicioLinea:
@@ -263,6 +296,18 @@ class AnalizadorLexico:
         if (caracter == ASTERISCO or caracter == MAS) and es_espacio(siguiente):
             return InicioLinea(LINEA_VINETA, indice, sangria, indice + 1)  # AS, MS
 
+        if es_digito(caracter):
+            # D1: digitos, D2: punto; seguido de espacio es un enumerador
+            fin = indice
+            while fin < len(linea) and es_digito(linea[fin]) and fin - indice < MAXIMO_DIGITOS_ENUMERADOR:
+                fin += 1
+            if (
+                fin < len(linea) - 1
+                and linea[fin] == PUNTO
+                and es_espacio(linea[fin + 1])
+            ):
+                return InicioLinea(LINEA_ENUMERADA, indice, sangria, fin + 1)
+
         return InicioLinea(LINEA_PARRAFO, indice, sangria, indice)
 
     def _procesar_bloque(self) -> None:
@@ -277,7 +322,7 @@ class AnalizadorLexico:
         linea = self._lineas[self._indice_linea]
         inicio = self._analizar_inicio(linea)
 
-        if inicio.clase != LINEA_VINETA:
+        if inicio.clase not in (LINEA_VINETA, LINEA_ENUMERADA):
             columna = 1 if inicio.clase == LINEA_VACIA else inicio.indice + 1
             self._cerrar_lista(self._indice_linea + 1, columna)
 
@@ -299,8 +344,8 @@ class AnalizadorLexico:
             self._procesar_bloque_codigo(linea, inicio)
         elif inicio.clase == LINEA_REGLA:
             self._procesar_regla(linea, inicio)
-        elif inicio.clase == LINEA_VINETA:
-            self._procesar_vineta(linea, inicio)
+        elif inicio.clase in (LINEA_VINETA, LINEA_ENUMERADA):
+            self._procesar_item(linea, inicio)
         else:
             self._procesar_parrafo(inicio)
 
@@ -334,20 +379,39 @@ class AnalizadorLexico:
         self._agregar_salto_linea(numero_linea)
         self._indice_linea += 1
 
-    def _procesar_vineta(self, linea: str, inicio: InicioLinea) -> None:
-        """Emite INDENT/DEDENT segun la pila de sangrias, VIÑETA y el contenido."""
+    def _procesar_item(self, linea: str, inicio: InicioLinea) -> None:
+        """Emite INDENT/DEDENT segun la pila de sangrias, el marcador y el contenido.
+
+        El marcador es una VIÑETA (-, *, +) o un ENUMERADOR (1.). Ambos
+        comparten la misma pila de sangrias. Si el contenido empieza con una
+        casilla [ ] o [x], se emite el token CASILLA (lista de tareas).
+        """
         numero_linea = self._indice_linea + 1
         columna = inicio.indice + 1
         self._actualizar_sangria(inicio.sangria, numero_linea, columna)
 
+        tipo = TipoToken.ENUMERADOR if inicio.clase == LINEA_ENUMERADA else TipoToken.VINETA
         self._agregar(
-            TipoToken.VINETA,
-            linea[inicio.indice],
+            tipo,
+            linea[inicio.indice:inicio.fin_marcador],
             numero_linea,
             columna,
             sangria=inicio.sangria,
         )
         contenido = self._saltar_espacios(linea, inicio.fin_marcador)
+
+        # X1-X3: casilla de tarea seguida de espacio o fin de linea
+        es_casilla = (
+            contenido + 2 < len(linea)
+            and linea[contenido] == CORCHETE_ABRE
+            and linea[contenido + 1] in MARCAS_CASILLA
+            and linea[contenido + 2] == CORCHETE_CIERRA
+            and (contenido + 3 == len(linea) or es_espacio(linea[contenido + 3]))
+        )
+        if es_casilla:
+            self._agregar(TipoToken.CASILLA, linea[contenido:contenido + 3], numero_linea, contenido + 1)
+            contenido = self._saltar_espacios(linea, contenido + 3)
+
         self._tokenizar_en_linea([(numero_linea, contenido)])
         self._agregar_salto_linea(numero_linea)
         self._indice_linea += 1
@@ -525,7 +589,7 @@ class AnalizadorLexico:
     # ------------------------------------------------------------------
 
     def _tokenizar_en_linea(self, segmentos: list[tuple[int, int]]) -> None:
-        """Estados E0, T, I1, N2, K1, LI y K2 sobre el contenido de un bloque.
+        """Tokeniza el contenido en linea de un bloque.
 
         Args:
             segmentos: Pares (numero de linea, indice de inicio) que forman el
@@ -533,27 +597,55 @@ class AnalizadorLexico:
                 salto de linea suave.
         """
         caracteres = self._caracteres_del_bloque(segmentos)
-        abiertos: list[Token] = []      # pila de NEGRITA/CURSIVA sin cerrar
-        acentos_como_texto: set[int] = set()
-        posicion = 0
+        enlaces = self._buscar_enlaces(caracteres)
+        self._tokenizar_rango(caracteres, 0, len(caracteres), enlaces)
 
-        while posicion < len(caracteres):
+    def _tokenizar_rango(
+        self,
+        caracteres: list[tuple[str, int, int]],
+        inicio: int,
+        fin: int,
+        enlaces: dict[int, Enlace],
+    ) -> None:
+        """Estados E0, T, I1, N2, V1-V2, K1, LI y K2 sobre un rango del bloque.
+
+        Cada rango tiene su propia pila de delimitadores abiertos: al final
+        del rango, los que sigan abiertos se reportan como sin cerrar. El
+        texto de un enlace se tokeniza como un rango independiente.
+
+        Args:
+            enlaces: Enlaces e imagenes del bloque indexados por su posicion
+                de inicio; vacio dentro del texto de un enlace, porque no se
+                admiten enlaces anidados.
+        """
+        abiertos: list[Token] = []      # pila de NEGRITA/CURSIVA/TACHADO sin cerrar
+        acentos_como_texto: set[int] = set()
+        posicion = inicio
+
+        while posicion < fin:
             caracter = caracteres[posicion][0]
 
             if caracter == ASTERISCO:
-                posicion = self._reconocer_asteriscos(caracteres, posicion, abiertos)
+                posicion = self._reconocer_asteriscos(caracteres, posicion, fin, abiertos)
+
+            elif self._es_tachado(caracteres, posicion, fin):
+                self._delimitador(TipoToken.TACHADO, caracteres, posicion, 2, abiertos)
+                posicion += 2
 
             elif caracter == ACENTO_GRAVE and posicion not in acentos_como_texto:
-                posicion = self._reconocer_codigo_inline(caracteres, posicion, acentos_como_texto)
+                posicion = self._reconocer_codigo_inline(caracteres, posicion, fin, acentos_como_texto)
+
+            elif posicion in enlaces:
+                posicion = self._reconocer_enlace(caracteres, posicion, enlaces[posicion])
 
             else:
                 # Estado T: avanza mientras no aparezca un delimitador
-                inicio = posicion
-                while posicion < len(caracteres) and not self._es_delimitador(
-                    caracteres, posicion, acentos_como_texto
+                inicio_texto = posicion
+                while posicion < fin and not self._es_delimitador(
+                    caracteres, posicion, fin, acentos_como_texto, enlaces
                 ):
                     posicion += 1
-                self._agregar_desde(TipoToken.TEXTO, caracteres, inicio, posicion)
+                self._agregar_desde(TipoToken.TEXTO, caracteres, inicio_texto, posicion)
 
         for token in abiertos:
             self._reportar_sin_cerrar(token)
@@ -571,14 +663,29 @@ class AnalizadorLexico:
         return caracteres
 
     @staticmethod
+    def _es_tachado(caracteres: list[tuple[str, int, int]], posicion: int, fin: int) -> bool:
+        """Estados V1 y V2: dos virgulillas seguidas forman un delimitador TACHADO."""
+        return (
+            posicion + 1 < fin
+            and caracteres[posicion][0] == VIRGULILLA
+            and caracteres[posicion + 1][0] == VIRGULILLA
+        )
+
     def _es_delimitador(
-        caracteres: list[tuple[str, int, int]], posicion: int, acentos_como_texto: set[int]
+        self,
+        caracteres: list[tuple[str, int, int]],
+        posicion: int,
+        fin: int,
+        acentos_como_texto: set[int],
+        enlaces: dict[int, Enlace],
     ) -> bool:
         """Indica si el caracter en la posicion termina un TEXTO."""
         caracter = caracteres[posicion][0]
-        if caracter == ASTERISCO:
+        if caracter == ASTERISCO or posicion in enlaces:
             return True
-        return caracter == ACENTO_GRAVE and posicion not in acentos_como_texto
+        if caracter == ACENTO_GRAVE:
+            return posicion not in acentos_como_texto
+        return self._es_tachado(caracteres, posicion, fin)
 
     def _agregar_desde(
         self,
@@ -596,6 +703,7 @@ class AnalizadorLexico:
         self,
         caracteres: list[tuple[str, int, int]],
         posicion: int,
+        fin: int,
         abiertos: list[Token],
     ) -> int:
         """Estados I1 y N2: divide una secuencia de asteriscos en NEGRITA y CURSIVA.
@@ -608,7 +716,7 @@ class AnalizadorLexico:
             La posicion siguiente a la secuencia.
         """
         restantes = 0
-        while posicion + restantes < len(caracteres) and caracteres[posicion + restantes][0] == ASTERISCO:
+        while posicion + restantes < fin and caracteres[posicion + restantes][0] == ASTERISCO:
             restantes += 1
 
         while restantes > 0:
@@ -664,33 +772,34 @@ class AnalizadorLexico:
 
     def _reportar_sin_cerrar(self, token: Token) -> None:
         """Registra un delimitador sin cerrar y lo reclasifica como TEXTO."""
-        tipo_error = (
-            TipoError.NEGRITA_SIN_CERRAR
-            if token.tipo == TipoToken.NEGRITA
-            else TipoError.CURSIVA_SIN_CERRAR
-        )
-        self._gestor.registrar(tipo_error, token.lexema, token.linea, token.columna)
+        tipos_error = {
+            TipoToken.NEGRITA: TipoError.NEGRITA_SIN_CERRAR,
+            TipoToken.CURSIVA: TipoError.CURSIVA_SIN_CERRAR,
+            TipoToken.TACHADO: TipoError.TACHADO_SIN_CERRAR,
+        }
+        self._gestor.registrar(tipos_error[token.tipo], token.lexema, token.linea, token.columna)
         token.tipo = TipoToken.TEXTO
 
     def _reconocer_codigo_inline(
         self,
         caracteres: list[tuple[str, int, int]],
         posicion: int,
+        fin: int,
         acentos_como_texto: set[int],
     ) -> int:
         """Estados K1, LI y K2: codigo en linea con contenido literal.
 
-        Si el bloque termina sin el acento grave de cierre se reporta el
+        Si el rango termina sin el acento grave de cierre se reporta el
         error y el acento de apertura pasa a ser parte del texto.
 
         Returns:
             La posicion desde donde continua el analisis.
         """
         cierre = posicion + 1
-        while cierre < len(caracteres) and caracteres[cierre][0] != ACENTO_GRAVE:
+        while cierre < fin and caracteres[cierre][0] != ACENTO_GRAVE:
             cierre += 1
 
-        if cierre == len(caracteres):
+        if cierre == fin:
             _, linea, columna = caracteres[posicion]
             self._gestor.registrar(TipoError.CODIGO_INLINE_SIN_CERRAR, ACENTO_GRAVE, linea, columna)
             acentos_como_texto.add(posicion)
@@ -701,3 +810,67 @@ class AnalizadorLexico:
             self._agregar_desde(TipoToken.TEXTO_LITERAL, caracteres, posicion + 1, cierre)
         self._agregar_desde(TipoToken.CODIGO_INLINE, caracteres, cierre, cierre + 1)
         return cierre + 1
+
+    # ------------------------------------------------------------------
+    # Enlaces e imagenes
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _buscar_enlaces(caracteres: list[tuple[str, int, int]]) -> dict[int, Enlace]:
+        """Estados P1-P3, M1 y U1-U2: localiza los enlaces completos del bloque.
+
+        Un corchete solo inicia un enlace si va seguido de un texto sin saltos
+        de linea ni corchetes, el corchete de cierre, un parentesis y una url
+        sin espacios. Si el patron no esta completo, los corchetes son texto
+        normal y no se reporta ningun error.
+
+        Returns:
+            Diccionario de la posicion de inicio ('[' o el '!' de una imagen)
+            a las posiciones del enlace.
+        """
+        enlaces: dict[int, Enlace] = {}
+        total = len(caracteres)
+        for posicion in range(total):
+            if caracteres[posicion][0] != CORCHETE_ABRE:
+                continue
+
+            fin_texto = posicion + 1
+            while fin_texto < total and caracteres[fin_texto][0] not in (CORCHETE_ABRE, CORCHETE_CIERRA, SALTO):
+                fin_texto += 1
+            if fin_texto + 1 >= total or caracteres[fin_texto][0] != CORCHETE_CIERRA:
+                continue
+            if caracteres[fin_texto + 1][0] != PARENTESIS_ABRE:
+                continue
+
+            fin_url = fin_texto + 2
+            while fin_url < total and caracteres[fin_url][0] not in (PARENTESIS_CIERRA, ESPACIO, TABULACION, SALTO):
+                fin_url += 1
+            if fin_url >= total or caracteres[fin_url][0] != PARENTESIS_CIERRA or fin_url == fin_texto + 2:
+                continue
+
+            es_imagen = posicion > 0 and caracteres[posicion - 1][0] == EXCLAMACION
+            inicio = posicion - 1 if es_imagen else posicion
+            enlaces[inicio] = Enlace(es_imagen, posicion + 1, fin_texto, fin_url)
+        return enlaces
+
+    def _reconocer_enlace(self, caracteres: list[tuple[str, int, int]], posicion: int, enlace: Enlace) -> int:
+        """Emite los tokens de un enlace o de una imagen.
+
+        En un enlace, el texto entre corchetes se tokeniza como un rango
+        independiente (puede contener negrita, cursiva, tachado o codigo). En
+        una imagen, el texto alternativo se emite como un unico TEXTO.
+
+        Returns:
+            La posicion siguiente al parentesis de cierre.
+        """
+        if enlace.es_imagen:
+            self._agregar_desde(TipoToken.IMAGEN_ABRE, caracteres, posicion, enlace.inicio_texto)
+            if enlace.fin_texto > enlace.inicio_texto:
+                self._agregar_desde(TipoToken.TEXTO, caracteres, enlace.inicio_texto, enlace.fin_texto)
+        else:
+            self._agregar_desde(TipoToken.CORCHETE_ABRE, caracteres, posicion, enlace.inicio_texto)
+            self._tokenizar_rango(caracteres, enlace.inicio_texto, enlace.fin_texto, {})
+
+        self._agregar_desde(TipoToken.CORCHETE_CIERRA, caracteres, enlace.fin_texto, enlace.fin_texto + 1)
+        self._agregar_desde(TipoToken.URL, caracteres, enlace.fin_texto + 1, enlace.fin_url + 1)
+        return enlace.fin_url + 1
