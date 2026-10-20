@@ -1,15 +1,24 @@
 """Ventana principal de MarkdownCheck (PyQt6).
 
 La ventana solo orquesta: lee el archivo con el CargadorArchivos, ejecuta el
-analisis lexico y sintactico y muestra los resultados. No contiene logica de
-analisis.
+analisis lexico y sintactico, muestra los resultados y pide al
+GeneradorReportes que escriba los reportes. No contiene logica de analisis.
 """
 
 import os
 import time
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QAction, QCloseEvent, QColor, QDragEnterEvent, QDropEvent, QFont, QKeySequence
+from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtGui import (
+    QAction,
+    QCloseEvent,
+    QColor,
+    QDesktopServices,
+    QDragEnterEvent,
+    QDropEvent,
+    QFont,
+    QKeySequence,
+)
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QFileDialog,
@@ -23,6 +32,7 @@ from PyQt6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
+    QTextBrowser,
     QToolBar,
     QTreeWidget,
     QTreeWidgetItem,
@@ -38,11 +48,15 @@ from interfaz.editor_codigo import EditorCodigo
 from modelos.error_analisis import ErrorAnalisis, Fase
 from modelos.nodo_ast import NodoAST
 from modelos.token import Token
+from reportes.generador_html import GeneradorHTML
+from reportes.generador_reportes import GeneradorReportes, SalidasGeneradas
 from servicios.cargador_archivos import CargadorArchivos, ErrorCarga
 
 NOMBRE_APLICACION = "MarkdownCheck"
 DIRECTORIO_PROYECTO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DIRECTORIO_EJEMPLOS = os.path.join(DIRECTORIO_PROYECTO, "examples")
+DIRECTORIO_SALIDAS = os.path.join(DIRECTORIO_PROYECTO, "salidas")
+NOMBRE_SIN_TITULO = "sin_titulo.md"
 FILTRO_MARKDOWN = "Archivos Markdown (*.md)"
 
 COLUMNAS_TOKENS = ["No.", "Lexema", "Tipo", "Línea", "Columna"]
@@ -52,6 +66,15 @@ COLUMNAS_ARBOL = ["Símbolo", "Lexema", "Línea", "Columna"]
 PESTANA_TOKENS = 0
 PESTANA_ERRORES = 1
 PESTANA_ARBOL = 2
+
+# Subconjunto de CSS que interpreta QTextBrowser para la vista previa
+CSS_VISTA_PREVIA = """
+body { font-size: 11pt; }
+h1, h2 { color: #1F2933; }
+code { background-color: #EEF1F4; font-family: monospace; }
+pre { background-color: #EEF1F4; color: #1F2933; font-family: monospace; }
+blockquote { color: #52606D; margin-left: 18px; }
+"""
 
 TEXTO_INICIAL = (
     "Abra un archivo .md o escriba en el editor y presione Analizar (F5)."
@@ -95,6 +118,8 @@ class VentanaPrincipal(QMainWindow):
         self._errores: list[ErrorAnalisis] = []
         self._raiz: NodoAST | None = None
         self._analisis_vigente = False
+        self._salidas: SalidasGeneradas | None = None
+        self._generador_reportes = GeneradorReportes(DIRECTORIO_SALIDAS)
 
         self.setWindowTitle(NOMBRE_APLICACION)
         self.resize(1320, 820)
@@ -139,6 +164,33 @@ class VentanaPrincipal(QMainWindow):
         self.accion_acerca = QAction("Acerca de", self)
         self.accion_acerca.triggered.connect(self._mostrar_acerca_de)
 
+        self.accion_documento = self._crear_accion(
+            "Documento", "Ctrl+1", lambda: self._abrir_salida("documento"), "Abrir el Reporte 1: documento HTML"
+        )
+        self.accion_estadisticas = self._crear_accion(
+            "Estadísticas", "Ctrl+2", lambda: self._abrir_salida("estadisticas"), "Abrir el Reporte 2: estadísticas"
+        )
+        self.accion_indice = self._crear_accion(
+            "Índice", "Ctrl+3", lambda: self._abrir_salida("indice"), "Abrir el Reporte 3: tabla de contenido"
+        )
+        self.accion_arbol = self._crear_accion(
+            "Árbol", "Ctrl+4", self._abrir_arbol, "Abrir el árbol de derivación generado con Graphviz"
+        )
+        self.accion_reporte_errores = self._crear_accion(
+            "Errores", "Ctrl+5", lambda: self._abrir_salida("errores"), "Abrir el reporte HTML de errores"
+        )
+        self.accion_carpeta = self._crear_accion(
+            "Carpeta de salidas", "Ctrl+6", lambda: self._abrir_salida("directorio"), "Abrir la carpeta con los archivos generados"
+        )
+        self._acciones_reportes = [
+            self.accion_documento,
+            self.accion_estadisticas,
+            self.accion_indice,
+            self.accion_arbol,
+            self.accion_reporte_errores,
+            self.accion_carpeta,
+        ]
+
     def _crear_menu(self) -> None:
         menu_archivo = self.menuBar().addMenu("&Archivo")
         menu_archivo.addActions([self.accion_nuevo, self.accion_abrir, self.accion_guardar, self.accion_guardar_como])
@@ -147,6 +199,11 @@ class VentanaPrincipal(QMainWindow):
 
         menu_analisis = self.menuBar().addMenu("A&nálisis")
         menu_analisis.addAction(self.accion_analizar)
+
+        menu_reportes = self.menuBar().addMenu("&Reportes")
+        menu_reportes.addActions([self.accion_documento, self.accion_estadisticas, self.accion_indice])
+        menu_reportes.addSeparator()
+        menu_reportes.addActions([self.accion_arbol, self.accion_reporte_errores, self.accion_carpeta])
 
         menu_ayuda = self.menuBar().addMenu("A&yuda")
         menu_ayuda.addActions([self.accion_sintaxis, self.accion_acerca])
@@ -159,6 +216,8 @@ class VentanaPrincipal(QMainWindow):
         barra.addSeparator()
         barra.addAction(self.accion_analizar)
         barra.widgetForAction(self.accion_analizar).setObjectName("botonAnalizar")
+        barra.addSeparator()
+        barra.addActions(self._acciones_reportes)
         self.addToolBar(barra)
 
     def _crear_panel(self, titulo: str) -> tuple[QFrame, QVBoxLayout, QLabel]:
@@ -207,6 +266,11 @@ class VentanaPrincipal(QMainWindow):
         self.pestanas.addTab(self.tabla_tokens, "Tokens")
         self.pestanas.addTab(self.tabla_errores, "Errores")
         self.pestanas.addTab(self.arbol, "Árbol de derivación")
+        self.vista_previa = QTextBrowser()
+        self.vista_previa.setOpenLinks(False)
+        self.vista_previa.document().setDefaultStyleSheet(CSS_VISTA_PREVIA)
+        self.vista_previa.document().setDocumentMargin(16)
+        self.pestanas.addTab(self.vista_previa, "Vista previa")
         diseno_resultados.addWidget(self.pestanas)
 
         divisor = QSplitter(Qt.Orientation.Horizontal)
@@ -386,9 +450,72 @@ class VentanaPrincipal(QMainWindow):
         self._mostrar_tokens()
         self._mostrar_errores()
         self._mostrar_arbol()
+        self.vista_previa.setHtml(GeneradorHTML(raiz).generar_cuerpo())
         self.editor.marcar_lineas_error({error.linea for error in self._errores})
         self.etiqueta_tiempo.setText(f"{milisegundos:.1f} ms")
         self._actualizar_banner()
+        self._generar_salidas()
+
+    def _generar_salidas(self) -> None:
+        """Escribe los reportes del analisis actual en salidas/<archivo>/.
+
+        Sin errores se generan los tres reportes y arbol.dot; con errores,
+        solo el reporte de errores.
+        """
+        nombre = os.path.basename(self._ruta) if self._ruta else NOMBRE_SIN_TITULO
+        try:
+            if self._errores:
+                self._salidas = self._generador_reportes.generar_errores(self._errores, nombre)
+            else:
+                self._salidas = self._generador_reportes.generar(self._raiz, nombre)
+        except OSError as error:
+            self._salidas = None
+            QMessageBox.warning(self, "No se pudieron generar los reportes", str(error))
+        self._actualizar_acciones_reportes()
+
+        if self._salidas is not None:
+            carpeta = os.path.relpath(self._salidas.directorio, DIRECTORIO_PROYECTO)
+            if self._errores:
+                mensaje = f"Reporte de errores generado en {carpeta}. Corrija los errores para generar los reportes 1, 2 y 3."
+            else:
+                mensaje = f"Reportes y arbol.dot generados en {carpeta}"
+            self.statusBar().showMessage(mensaje, 8000)
+
+    def _actualizar_acciones_reportes(self) -> None:
+        """Habilita solo los botones de los archivos que existen."""
+        salidas = self._salidas
+        exito = salidas is not None and salidas.documento is not None
+        for accion in (self.accion_documento, self.accion_estadisticas, self.accion_indice, self.accion_arbol):
+            accion.setEnabled(exito)
+        self.accion_reporte_errores.setEnabled(salidas is not None and salidas.errores is not None)
+        self.accion_carpeta.setEnabled(salidas is not None)
+
+    def _abrir_salida(self, atributo: str) -> None:
+        """Abre con la aplicacion predeterminada un archivo o carpeta generado."""
+        ruta = getattr(self._salidas, atributo, None) if self._salidas else None
+        if not ruta or not os.path.exists(ruta):
+            QMessageBox.information(self, "Reporte no disponible", "Ejecute el análisis para generar este archivo.")
+            return
+        if not QDesktopServices.openUrl(QUrl.fromLocalFile(ruta)):
+            QMessageBox.information(self, "Abrir archivo", f"El archivo se encuentra en:\n{ruta}")
+
+    def _abrir_arbol(self) -> None:
+        """Abre el SVG del arbol; si Graphviz no esta instalado, indica donde esta arbol.dot."""
+        if self._salidas is not None and self._salidas.arbol_imagen:
+            self._abrir_salida("arbol_imagen")
+            return
+        ruta = self._salidas.arbol_dot if self._salidas else None
+        if not ruta:
+            QMessageBox.information(self, "Árbol no disponible", "Ejecute el análisis para generar arbol.dot.")
+            return
+        QMessageBox.information(
+            self,
+            "Árbol de derivación",
+            "Se generó el archivo arbol.dot, pero Graphviz no está instalado para convertirlo en imagen.\n\n"
+            f"Archivo: {ruta}\n\n"
+            "Instale Graphviz (https://graphviz.org) o pegue el contenido del archivo en un visor DOT en línea.",
+        )
+        self._abrir_salida("directorio")
 
     def _actualizar_banner(self) -> None:
         if not self._errores:
@@ -418,6 +545,9 @@ class VentanaPrincipal(QMainWindow):
         self.tabla_tokens.setRowCount(0)
         self.tabla_errores.setRowCount(0)
         self.arbol.clear()
+        self.vista_previa.clear()
+        self._salidas = None
+        self._actualizar_acciones_reportes()
         self.pestanas.setTabText(PESTANA_TOKENS, "Tokens")
         self.pestanas.setTabText(PESTANA_ERRORES, "Errores")
         self.editor.marcar_lineas_error(set())
