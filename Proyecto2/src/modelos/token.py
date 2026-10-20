@@ -13,6 +13,9 @@ class Token:
         tipo: Clasificacion asignada por el analizador lexico.
         linea: Linea donde inicia el lexema, comenzando en 1.
         columna: Columna donde inicia el lexema, comenzando en 1.
+        sangria: Ancho de la indentacion que precede a una VIÑETA, contando
+            cada tabulacion como 2 espacios. El parser lo usa para validar el
+            anidamiento; en los demas tokens vale 0.
     """
 
     def __init__(
@@ -22,12 +25,14 @@ class Token:
         tipo: TipoToken,
         linea: int,
         columna: int,
+        sangria: int = 0,
     ) -> None:
         self.numero = numero
         self.lexema = lexema
         self.tipo = tipo
         self.linea = linea
         self.columna = columna
+        self.sangria = sangria
 
     @property
     def lexema_visible(self) -> str:
