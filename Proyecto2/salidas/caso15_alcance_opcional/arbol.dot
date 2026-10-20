@@ -27,7 +27,7 @@ digraph ArbolDerivacion {
     n21 [label="<item_lista>", fillcolor="#D6EAF8"];
     n22 [label="ENUMERADOR\n1.", fillcolor="#F9E79F"];
     n23 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n24 [label="TEXTO\nDisenar la gramatica", fillcolor="#F9E79F"];
+    n24 [label="TEXTO\nDiseñar la gramática", fillcolor="#F9E79F"];
     n25 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n26 [label="<sublista>", fillcolor="#D6EAF8"];
     n27 [label="INDENT", fillcolor="#F9E79F"];
@@ -57,7 +57,7 @@ digraph ArbolDerivacion {
     n51 [label="VIÑETA\n-", fillcolor="#F9E79F"];
     n52 [label="CASILLA\n[ ]", fillcolor="#F9E79F"];
     n53 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n54 [label="TEXTO\nPruebas de integracion", fillcolor="#F9E79F"];
+    n54 [label="TEXTO\nPruebas de integración", fillcolor="#F9E79F"];
     n55 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n56 [label="DEDENT", fillcolor="#F9E79F"];
     n57 [label="<item_lista>", fillcolor="#D6EAF8"];
@@ -95,7 +95,7 @@ digraph ArbolDerivacion {
     n89 [label="<encabezado>", fillcolor="#D6EAF8"];
     n90 [label="NUMERAL\n##", fillcolor="#F9E79F"];
     n91 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n92 [label="TEXTO\nEnlaces e imagenes", fillcolor="#F9E79F"];
+    n92 [label="TEXTO\nEnlaces e imágenes", fillcolor="#F9E79F"];
     n93 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n94 [label="<bloque>", fillcolor="#D6EAF8"];
     n95 [label="<separador>", fillcolor="#D6EAF8"];
@@ -107,7 +107,7 @@ digraph ArbolDerivacion {
     n101 [label="<enlace>", fillcolor="#D6EAF8"];
     n102 [label="CORCHETE_ABRE\n[", fillcolor="#F9E79F"];
     n103 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n104 [label="TEXTO\nguia de ", fillcolor="#F9E79F"];
+    n104 [label="TEXTO\nguía de ", fillcolor="#F9E79F"];
     n105 [label="<negrita>", fillcolor="#D6EAF8"];
     n106 [label="NEGRITA\n**", fillcolor="#F9E79F"];
     n107 [label="<en_linea>", fillcolor="#D6EAF8"];
@@ -119,7 +119,7 @@ digraph ArbolDerivacion {
     n113 [label="<enlace>", fillcolor="#D6EAF8"];
     n114 [label="CORCHETE_ABRE\n[", fillcolor="#F9E79F"];
     n115 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n116 [label="TEXTO\ndocumentacion de Graphviz", fillcolor="#F9E79F"];
+    n116 [label="TEXTO\ndocumentación de Graphviz", fillcolor="#F9E79F"];
     n117 [label="CORCHETE_CIERRA\n]", fillcolor="#F9E79F"];
     n118 [label="URL\n(https://graphviz.org/doc/in...", fillcolor="#F9E79F"];
     n119 [label="TEXTO\n.", fillcolor="#F9E79F"];
@@ -132,7 +132,7 @@ digraph ArbolDerivacion {
     n126 [label="<en_linea>", fillcolor="#D6EAF8"];
     n127 [label="<imagen>", fillcolor="#D6EAF8"];
     n128 [label="IMAGEN_ABRE\n![", fillcolor="#F9E79F"];
-    n129 [label="TEXTO\nArbol de derivacion del caso...", fillcolor="#F9E79F"];
+    n129 [label="TEXTO\nÁrbol de derivación del caso...", fillcolor="#F9E79F"];
     n130 [label="CORCHETE_CIERRA\n]", fillcolor="#F9E79F"];
     n131 [label="URL\n(../docs/imagenes/arbol_caso...", fillcolor="#F9E79F"];
     n132 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
@@ -143,7 +143,7 @@ digraph ArbolDerivacion {
     n137 [label="<encabezado>", fillcolor="#D6EAF8"];
     n138 [label="NUMERAL\n##", fillcolor="#F9E79F"];
     n139 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n140 [label="TEXTO\nCodigo con resaltado de sint...", fillcolor="#F9E79F"];
+    n140 [label="TEXTO\nCódigo con resaltado de sint...", fillcolor="#F9E79F"];
     n141 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n142 [label="<bloque>", fillcolor="#D6EAF8"];
     n143 [label="<separador>", fillcolor="#D6EAF8"];

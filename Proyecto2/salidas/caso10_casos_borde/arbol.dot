@@ -8,7 +8,7 @@ digraph ArbolDerivacion {
     n2 [label="<encabezado>", fillcolor="#D6EAF8"];
     n3 [label="NUMERAL\n#", fillcolor="#F9E79F"];
     n4 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n5 [label="TEXTO\nCasos borde validos", fillcolor="#F9E79F"];
+    n5 [label="TEXTO\nCasos borde válidos", fillcolor="#F9E79F"];
     n6 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n7 [label="<bloque>", fillcolor="#D6EAF8"];
     n8 [label="<separador>", fillcolor="#D6EAF8"];
@@ -32,7 +32,7 @@ digraph ArbolDerivacion {
     n26 [label="<bloque>", fillcolor="#D6EAF8"];
     n27 [label="<parrafo>", fillcolor="#D6EAF8"];
     n28 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n29 [label="TEXTO\nEl codigo ", fillcolor="#F9E79F"];
+    n29 [label="TEXTO\nEl código ", fillcolor="#F9E79F"];
     n30 [label="<codigo_inline>", fillcolor="#D6EAF8"];
     n31 [label="CODIGO_INLINE\n`", fillcolor="#F9E79F"];
     n32 [label="TEXTO_LITERAL\n**no es negrita**", fillcolor="#F9E79F"];
@@ -72,9 +72,9 @@ digraph ArbolDerivacion {
     n66 [label="<negrita>", fillcolor="#D6EAF8"];
     n67 [label="NEGRITA\n**", fillcolor="#F9E79F"];
     n68 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n69 [label="TEXTO\nempieza en esta linea\\ny term...", fillcolor="#F9E79F"];
+    n69 [label="TEXTO\nempieza en esta línea\\ny term...", fillcolor="#F9E79F"];
     n70 [label="NEGRITA\n**", fillcolor="#F9E79F"];
-    n71 [label="TEXTO\n dentro del mismo parrafo.", fillcolor="#F9E79F"];
+    n71 [label="TEXTO\n dentro del mismo párrafo.", fillcolor="#F9E79F"];
     n72 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n73 [label="<bloque>", fillcolor="#D6EAF8"];
     n74 [label="<separador>", fillcolor="#D6EAF8"];
@@ -93,7 +93,7 @@ digraph ArbolDerivacion {
     n87 [label="<item_lista>", fillcolor="#D6EAF8"];
     n88 [label="VIÑETA\n-", fillcolor="#F9E79F"];
     n89 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n90 [label="TEXTO\nItem con guion", fillcolor="#F9E79F"];
+    n90 [label="TEXTO\nÍtem con guion", fillcolor="#F9E79F"];
     n91 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n92 [label="<sublista>", fillcolor="#D6EAF8"];
     n93 [label="INDENT", fillcolor="#F9E79F"];
@@ -107,12 +107,12 @@ digraph ArbolDerivacion {
     n101 [label="<item_lista>", fillcolor="#D6EAF8"];
     n102 [label="VIÑETA\n+", fillcolor="#F9E79F"];
     n103 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n104 [label="TEXTO\nItem con signo mas", fillcolor="#F9E79F"];
+    n104 [label="TEXTO\nÍtem con signo más", fillcolor="#F9E79F"];
     n105 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n106 [label="<item_lista>", fillcolor="#D6EAF8"];
     n107 [label="VIÑETA\n*", fillcolor="#F9E79F"];
     n108 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n109 [label="TEXTO\nItem con asterisco", fillcolor="#F9E79F"];
+    n109 [label="TEXTO\nÍtem con asterisco", fillcolor="#F9E79F"];
     n110 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n111 [label="FIN_ARCHIVO", fillcolor="#F9E79F"];
 

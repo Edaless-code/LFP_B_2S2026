@@ -1,8 +1,8 @@
-# Titulo con **negrita sin cerrar
+# Título con **negrita sin cerrar
 
-Un parrafo con *cursiva que nunca cierra.
+Un párrafo con *cursiva que nunca cierra.
 
-- Un item con **negrita abierta
-- Un item correcto con *cursiva*
+- Un ítem con **negrita abierta
+- Un ítem correcto con *cursiva*
 
-Este parrafo es **correcto** y el analisis continua.
+Este párrafo es **correcto** y el análisis continúa.

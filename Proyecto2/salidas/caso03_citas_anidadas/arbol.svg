@@ -353,7 +353,7 @@
 <title>n21</title>
 <path fill="#f9e79f" stroke="black" d="M451.5,-252C451.5,-252 326.5,-252 326.5,-252 320.5,-252 314.5,-246 314.5,-240 314.5,-240 314.5,-228 314.5,-228 314.5,-222 320.5,-216 326.5,-216 326.5,-216 451.5,-216 451.5,-216 457.5,-216 463.5,-222 463.5,-228 463.5,-228 463.5,-240 463.5,-240 463.5,-246 457.5,-252 451.5,-252"/>
 <text text-anchor="middle" x="389" y="-237" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="389" y="-226" font-family="Arial" font-size="10.00">Nivel dos con la notacion do...</text>
+<text text-anchor="middle" x="389" y="-226" font-family="Arial" font-size="10.00">Nivel dos con la notación do...</text>
 </g>
 <!-- n20&#45;&gt;n21 -->
 <g id="edge16" class="edge">
@@ -404,7 +404,7 @@
 <title>n26</title>
 <path fill="#f9e79f" stroke="black" d="M703.5,-252C703.5,-252 578.5,-252 578.5,-252 572.5,-252 566.5,-246 566.5,-240 566.5,-240 566.5,-228 566.5,-228 566.5,-222 572.5,-216 578.5,-216 578.5,-216 703.5,-216 703.5,-216 709.5,-216 715.5,-222 715.5,-228 715.5,-228 715.5,-240 715.5,-240 715.5,-246 709.5,-252 703.5,-252"/>
 <text text-anchor="middle" x="641" y="-237" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="641" y="-226" font-family="Arial" font-size="10.00">Nivel dos con la notacion se...</text>
+<text text-anchor="middle" x="641" y="-226" font-family="Arial" font-size="10.00">Nivel dos con la notación se...</text>
 </g>
 <!-- n25&#45;&gt;n26 -->
 <g id="edge21" class="edge">
@@ -821,7 +821,7 @@
 <title>n62</title>
 <path fill="#f9e79f" stroke="black" d="M1277.5,-252C1277.5,-252 1206.5,-252 1206.5,-252 1200.5,-252 1194.5,-246 1194.5,-240 1194.5,-240 1194.5,-228 1194.5,-228 1194.5,-222 1200.5,-216 1206.5,-216 1206.5,-216 1277.5,-216 1277.5,-216 1283.5,-216 1289.5,-222 1289.5,-228 1289.5,-228 1289.5,-240 1289.5,-240 1289.5,-246 1283.5,-252 1277.5,-252"/>
 <text text-anchor="middle" x="1242" y="-237" font-family="Arial" font-size="10.00">TEXTO_LITERAL</text>
-<text text-anchor="middle" x="1242" y="-226" font-family="Arial" font-size="10.00">codigo</text>
+<text text-anchor="middle" x="1242" y="-226" font-family="Arial" font-size="10.00">código</text>
 </g>
 <!-- n60&#45;&gt;n62 -->
 <g id="edge57" class="edge">

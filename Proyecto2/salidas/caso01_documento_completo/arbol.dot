@@ -31,7 +31,7 @@ digraph ArbolDerivacion {
     n25 [label="TEXTO\n, ", fillcolor="#F9E79F"];
     n26 [label="<codigo_inline>", fillcolor="#D6EAF8"];
     n27 [label="CODIGO_INLINE\n`", fillcolor="#F9E79F"];
-    n28 [label="TEXTO_LITERAL\ncodigo en linea", fillcolor="#F9E79F"];
+    n28 [label="TEXTO_LITERAL\ncódigo en línea", fillcolor="#F9E79F"];
     n29 [label="CODIGO_INLINE\n`", fillcolor="#F9E79F"];
     n30 [label="TEXTO\n y combinaciones como ", fillcolor="#F9E79F"];
     n31 [label="<negrita>", fillcolor="#D6EAF8"];
@@ -137,7 +137,7 @@ digraph ArbolDerivacion {
     n131 [label="<item_lista>", fillcolor="#D6EAF8"];
     n132 [label="VIÑETA\n+", fillcolor="#F9E79F"];
     n133 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n134 [label="TEXTO\nTercer nivel con signo mas", fillcolor="#F9E79F"];
+    n134 [label="TEXTO\nTercer nivel con signo más", fillcolor="#F9E79F"];
     n135 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n136 [label="DEDENT", fillcolor="#F9E79F"];
     n137 [label="DEDENT", fillcolor="#F9E79F"];
@@ -183,7 +183,7 @@ digraph ArbolDerivacion {
     n177 [label="TEXTO\nUna cita anidada con ", fillcolor="#F9E79F"];
     n178 [label="<codigo_inline>", fillcolor="#D6EAF8"];
     n179 [label="CODIGO_INLINE\n`", fillcolor="#F9E79F"];
-    n180 [label="TEXTO_LITERAL\ncodigo", fillcolor="#F9E79F"];
+    n180 [label="TEXTO_LITERAL\ncódigo", fillcolor="#F9E79F"];
     n181 [label="CODIGO_INLINE\n`", fillcolor="#F9E79F"];
     n182 [label="TEXTO\n.", fillcolor="#F9E79F"];
     n183 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
@@ -194,7 +194,7 @@ digraph ArbolDerivacion {
     n188 [label="<encabezado>", fillcolor="#D6EAF8"];
     n189 [label="NUMERAL\n##", fillcolor="#F9E79F"];
     n190 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n191 [label="TEXTO\nCodigo", fillcolor="#F9E79F"];
+    n191 [label="TEXTO\nCódigo", fillcolor="#F9E79F"];
     n192 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n193 [label="<bloque>", fillcolor="#D6EAF8"];
     n194 [label="<separador>", fillcolor="#D6EAF8"];

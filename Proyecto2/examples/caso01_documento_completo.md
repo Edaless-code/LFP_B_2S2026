@@ -1,6 +1,6 @@
 # Manual de MarkdownCheck
 
-Este documento usa **todos los elementos obligatorios** del subconjunto, con *cursiva*, `codigo en linea` y combinaciones como **negrita con *cursiva* adentro** y *cursiva con **negrita** adentro*.
+Este documento usa **todos los elementos obligatorios** del subconjunto, con *cursiva*, `código en línea` y combinaciones como **negrita con *cursiva* adentro** y *cursiva con **negrita** adentro*.
 
 ## Encabezados
 
@@ -16,19 +16,19 @@ Este documento usa **todos los elementos obligatorios** del subconjunto, con *cu
 
 - Primer nivel con guion
   * Segundo nivel con asterisco
-    + Tercer nivel con signo mas
+    + Tercer nivel con signo más
 - Otro elemento con **negrita**
 
 ## Citas
 
 > Una cita con *cursiva*.
->> Una cita anidada con `codigo`.
+>> Una cita anidada con `código`.
 
-## Codigo
+## Código
 
 ```python
 def suma(a, b):
-    # Los **asteriscos** aqui no se interpretan
+    # Los **asteriscos** aquí no se interpretan
     return a + b
 ```
 

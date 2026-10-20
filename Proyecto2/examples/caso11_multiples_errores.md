@@ -1,13 +1,13 @@
-####### Encabezado invalido
+####### Encabezado inválido
 
-Parrafo con **negrita sin cerrar
+Párrafo con **negrita sin cerrar
 
-Parrafo con *cursiva sin cerrar
+Párrafo con *cursiva sin cerrar
 
-Parrafo con `codigo sin cerrar
+Párrafo con `código sin cerrar
 
-- Item
-    - Indentacion invalida
+- Ítem
+    - Indentación inválida
 
 >Cita mal formada
 

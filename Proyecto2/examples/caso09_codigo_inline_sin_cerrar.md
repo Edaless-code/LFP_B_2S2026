@@ -1,5 +1,5 @@
-# Codigo en linea sin cerrar
+# Código en línea sin cerrar
 
-Llame a la funcion `analizar() para comenzar.
+Llame a la función `analizar() para comenzar.
 
-- Item con `codigo correcto` y texto.
+- Ítem con `código correcto` y texto.

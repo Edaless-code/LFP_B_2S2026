@@ -42,7 +42,7 @@ digraph ArbolDerivacion {
     n36 [label="<item_lista>", fillcolor="#D6EAF8"];
     n37 [label="VIÑETA\n-", fillcolor="#F9E79F"];
     n38 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n39 [label="TEXTO\nNivel 4: Automatas finitos", fillcolor="#F9E79F"];
+    n39 [label="TEXTO\nNivel 4: Autómatas finitos", fillcolor="#F9E79F"];
     n40 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n41 [label="<item_lista>", fillcolor="#D6EAF8"];
     n42 [label="VIÑETA\n-", fillcolor="#F9E79F"];
@@ -59,7 +59,7 @@ digraph ArbolDerivacion {
     n53 [label="<item_lista>", fillcolor="#D6EAF8"];
     n54 [label="VIÑETA\n-", fillcolor="#F9E79F"];
     n55 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n56 [label="TEXTO\nNivel 2: De programacion", fillcolor="#F9E79F"];
+    n56 [label="TEXTO\nNivel 2: De programación", fillcolor="#F9E79F"];
     n57 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n58 [label="DEDENT", fillcolor="#F9E79F"];
     n59 [label="<item_lista>", fillcolor="#D6EAF8"];
@@ -74,7 +74,7 @@ digraph ArbolDerivacion {
     n68 [label="TEXTO\n y ", fillcolor="#F9E79F"];
     n69 [label="<codigo_inline>", fillcolor="#D6EAF8"];
     n70 [label="CODIGO_INLINE\n`", fillcolor="#F9E79F"];
-    n71 [label="TEXTO_LITERAL\ncodigo", fillcolor="#F9E79F"];
+    n71 [label="TEXTO_LITERAL\ncódigo", fillcolor="#F9E79F"];
     n72 [label="CODIGO_INLINE\n`", fillcolor="#F9E79F"];
     n73 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n74 [label="<bloque>", fillcolor="#D6EAF8"];
@@ -83,7 +83,7 @@ digraph ArbolDerivacion {
     n77 [label="<bloque>", fillcolor="#D6EAF8"];
     n78 [label="<parrafo>", fillcolor="#D6EAF8"];
     n79 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n80 [label="TEXTO\nUn parrafo separa dos listas...", fillcolor="#F9E79F"];
+    n80 [label="TEXTO\nUn párrafo separa dos listas...", fillcolor="#F9E79F"];
     n81 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n82 [label="<bloque>", fillcolor="#D6EAF8"];
     n83 [label="<separador>", fillcolor="#D6EAF8"];

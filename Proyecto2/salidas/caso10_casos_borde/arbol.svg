@@ -286,7 +286,7 @@
 <title>n5</title>
 <path fill="#f9e79f" stroke="black" d="M158,-324C158,-324 76,-324 76,-324 70,-324 64,-318 64,-312 64,-312 64,-300 64,-300 64,-294 70,-288 76,-288 76,-288 158,-288 158,-288 164,-288 170,-294 170,-300 170,-300 170,-312 170,-312 170,-318 164,-324 158,-324"/>
 <text text-anchor="middle" x="117" y="-309" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="117" y="-298" font-family="Arial" font-size="10.00">Casos borde validos</text>
+<text text-anchor="middle" x="117" y="-298" font-family="Arial" font-size="10.00">Casos borde válidos</text>
 </g>
 <!-- n4&#45;&gt;n5 -->
 <g id="edge2" class="edge">
@@ -536,7 +536,7 @@
 <title>n29</title>
 <path fill="#f9e79f" stroke="black" d="M650,-324C650,-324 614,-324 614,-324 608,-324 602,-318 602,-312 602,-312 602,-300 602,-300 602,-294 608,-288 614,-288 614,-288 650,-288 650,-288 656,-288 662,-294 662,-300 662,-300 662,-312 662,-312 662,-318 656,-324 650,-324"/>
 <text text-anchor="middle" x="632" y="-309" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="632" y="-298" font-family="Arial" font-size="10.00">El codigo </text>
+<text text-anchor="middle" x="632" y="-298" font-family="Arial" font-size="10.00">El código </text>
 </g>
 <!-- n28&#45;&gt;n29 -->
 <g id="edge26" class="edge">
@@ -913,7 +913,7 @@
 <title>n71</title>
 <path fill="#f9e79f" stroke="black" d="M2155.5,-324C2155.5,-324 2048.5,-324 2048.5,-324 2042.5,-324 2036.5,-318 2036.5,-312 2036.5,-312 2036.5,-300 2036.5,-300 2036.5,-294 2042.5,-288 2048.5,-288 2048.5,-288 2155.5,-288 2155.5,-288 2161.5,-288 2167.5,-294 2167.5,-300 2167.5,-300 2167.5,-312 2167.5,-312 2167.5,-318 2161.5,-324 2155.5,-324"/>
 <text text-anchor="middle" x="2102" y="-309" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="2102" y="-298" font-family="Arial" font-size="10.00"> dentro del mismo parrafo.</text>
+<text text-anchor="middle" x="2102" y="-298" font-family="Arial" font-size="10.00"> dentro del mismo párrafo.</text>
 </g>
 <!-- n64&#45;&gt;n71 -->
 <g id="edge68" class="edge">
@@ -962,9 +962,9 @@
 <!-- n69 -->
 <g id="node70" class="node">
 <title>n69</title>
-<path fill="#f9e79f" stroke="black" d="M2055.5,-180C2055.5,-180 1922.5,-180 1922.5,-180 1916.5,-180 1910.5,-174 1910.5,-168 1910.5,-168 1910.5,-156 1910.5,-156 1910.5,-150 1916.5,-144 1922.5,-144 1922.5,-144 2055.5,-144 2055.5,-144 2061.5,-144 2067.5,-150 2067.5,-156 2067.5,-156 2067.5,-168 2067.5,-168 2067.5,-174 2061.5,-180 2055.5,-180"/>
+<path fill="#f9e79f" stroke="black" d="M2056,-180C2056,-180 1922,-180 1922,-180 1916,-180 1910,-174 1910,-168 1910,-168 1910,-156 1910,-156 1910,-150 1916,-144 1922,-144 1922,-144 2056,-144 2056,-144 2062,-144 2068,-150 2068,-156 2068,-156 2068,-168 2068,-168 2068,-174 2062,-180 2056,-180"/>
 <text text-anchor="middle" x="1989" y="-165" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="1989" y="-154" font-family="Arial" font-size="10.00">empieza en esta linea\ny term...</text>
+<text text-anchor="middle" x="1989" y="-154" font-family="Arial" font-size="10.00">empieza en esta línea\ny term...</text>
 </g>
 <!-- n68&#45;&gt;n69 -->
 <g id="edge64" class="edge">
@@ -1189,7 +1189,7 @@
 <title>n90</title>
 <path fill="#f9e79f" stroke="black" d="M2740.5,-252C2740.5,-252 2683.5,-252 2683.5,-252 2677.5,-252 2671.5,-246 2671.5,-240 2671.5,-240 2671.5,-228 2671.5,-228 2671.5,-222 2677.5,-216 2683.5,-216 2683.5,-216 2740.5,-216 2740.5,-216 2746.5,-216 2752.5,-222 2752.5,-228 2752.5,-228 2752.5,-240 2752.5,-240 2752.5,-246 2746.5,-252 2740.5,-252"/>
 <text text-anchor="middle" x="2712" y="-237" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="2712" y="-226" font-family="Arial" font-size="10.00">Item con guion</text>
+<text text-anchor="middle" x="2712" y="-226" font-family="Arial" font-size="10.00">Ítem con guion</text>
 </g>
 <!-- n89&#45;&gt;n90 -->
 <g id="edge86" class="edge">
@@ -1339,7 +1339,7 @@
 <title>n104</title>
 <path fill="#f9e79f" stroke="black" d="M3098.5,-252C3098.5,-252 3019.5,-252 3019.5,-252 3013.5,-252 3007.5,-246 3007.5,-240 3007.5,-240 3007.5,-228 3007.5,-228 3007.5,-222 3013.5,-216 3019.5,-216 3019.5,-216 3098.5,-216 3098.5,-216 3104.5,-216 3110.5,-222 3110.5,-228 3110.5,-228 3110.5,-240 3110.5,-240 3110.5,-246 3104.5,-252 3098.5,-252"/>
 <text text-anchor="middle" x="3059" y="-237" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="3059" y="-226" font-family="Arial" font-size="10.00">Item con signo mas</text>
+<text text-anchor="middle" x="3059" y="-226" font-family="Arial" font-size="10.00">Ítem con signo más</text>
 </g>
 <!-- n103&#45;&gt;n104 -->
 <g id="edge100" class="edge">
@@ -1390,7 +1390,7 @@
 <title>n109</title>
 <path fill="#f9e79f" stroke="black" d="M3343,-252C3343,-252 3269,-252 3269,-252 3263,-252 3257,-246 3257,-240 3257,-240 3257,-228 3257,-228 3257,-222 3263,-216 3269,-216 3269,-216 3343,-216 3343,-216 3349,-216 3355,-222 3355,-228 3355,-228 3355,-240 3355,-240 3355,-246 3349,-252 3343,-252"/>
 <text text-anchor="middle" x="3306" y="-237" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="3306" y="-226" font-family="Arial" font-size="10.00">Item con asterisco</text>
+<text text-anchor="middle" x="3306" y="-226" font-family="Arial" font-size="10.00">Ítem con asterisco</text>
 </g>
 <!-- n108&#45;&gt;n109 -->
 <g id="edge105" class="edge">

@@ -758,7 +758,7 @@
 <title>n28</title>
 <path fill="#f9e79f" stroke="black" d="M784.5,-468C784.5,-468 713.5,-468 713.5,-468 707.5,-468 701.5,-462 701.5,-456 701.5,-456 701.5,-444 701.5,-444 701.5,-438 707.5,-432 713.5,-432 713.5,-432 784.5,-432 784.5,-432 790.5,-432 796.5,-438 796.5,-444 796.5,-444 796.5,-456 796.5,-456 796.5,-462 790.5,-468 784.5,-468"/>
 <text text-anchor="middle" x="749" y="-453" font-family="Arial" font-size="10.00">TEXTO_LITERAL</text>
-<text text-anchor="middle" x="749" y="-442" font-family="Arial" font-size="10.00">codigo en linea</text>
+<text text-anchor="middle" x="749" y="-442" font-family="Arial" font-size="10.00">código en línea</text>
 </g>
 <!-- n26&#45;&gt;n28 -->
 <g id="edge24" class="edge">
@@ -1887,7 +1887,7 @@
 <title>n134</title>
 <path fill="#f9e79f" stroke="black" d="M3577,-36C3577,-36 3467,-36 3467,-36 3461,-36 3455,-30 3455,-24 3455,-24 3455,-12 3455,-12 3455,-6 3461,0 3467,0 3467,0 3577,0 3577,0 3583,0 3589,-6 3589,-12 3589,-12 3589,-24 3589,-24 3589,-30 3583,-36 3577,-36"/>
 <text text-anchor="middle" x="3522" y="-21" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="3522" y="-10" font-family="Arial" font-size="10.00">Tercer nivel con signo mas</text>
+<text text-anchor="middle" x="3522" y="-10" font-family="Arial" font-size="10.00">Tercer nivel con signo más</text>
 </g>
 <!-- n133&#45;&gt;n134 -->
 <g id="edge124" class="edge">
@@ -2391,7 +2391,7 @@
 <title>n180</title>
 <path fill="#f9e79f" stroke="black" d="M4292.5,-324C4292.5,-324 4221.5,-324 4221.5,-324 4215.5,-324 4209.5,-318 4209.5,-312 4209.5,-312 4209.5,-300 4209.5,-300 4209.5,-294 4215.5,-288 4221.5,-288 4221.5,-288 4292.5,-288 4292.5,-288 4298.5,-288 4304.5,-294 4304.5,-300 4304.5,-300 4304.5,-312 4304.5,-312 4304.5,-318 4298.5,-324 4292.5,-324"/>
 <text text-anchor="middle" x="4257" y="-309" font-family="Arial" font-size="10.00">TEXTO_LITERAL</text>
-<text text-anchor="middle" x="4257" y="-298" font-family="Arial" font-size="10.00">codigo</text>
+<text text-anchor="middle" x="4257" y="-298" font-family="Arial" font-size="10.00">código</text>
 </g>
 <!-- n178&#45;&gt;n180 -->
 <g id="edge174" class="edge">
@@ -2492,7 +2492,7 @@
 <title>n191</title>
 <path fill="#f9e79f" stroke="black" d="M4434,-540C4434,-540 4404,-540 4404,-540 4398,-540 4392,-534 4392,-528 4392,-528 4392,-516 4392,-516 4392,-510 4398,-504 4404,-504 4404,-504 4434,-504 4434,-504 4440,-504 4446,-510 4446,-516 4446,-516 4446,-528 4446,-528 4446,-534 4440,-540 4434,-540"/>
 <text text-anchor="middle" x="4419" y="-525" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="4419" y="-514" font-family="Arial" font-size="10.00">Codigo</text>
+<text text-anchor="middle" x="4419" y="-514" font-family="Arial" font-size="10.00">Código</text>
 </g>
 <!-- n190&#45;&gt;n191 -->
 <g id="edge188" class="edge">

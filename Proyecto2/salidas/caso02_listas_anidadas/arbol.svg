@@ -647,7 +647,7 @@
 <title>n39</title>
 <path fill="#f9e79f" stroke="black" d="M197.5,-36C197.5,-36 92.5,-36 92.5,-36 86.5,-36 80.5,-30 80.5,-24 80.5,-24 80.5,-12 80.5,-12 80.5,-6 86.5,0 92.5,0 92.5,0 197.5,0 197.5,0 203.5,0 209.5,-6 209.5,-12 209.5,-12 209.5,-24 209.5,-24 209.5,-30 203.5,-36 197.5,-36"/>
 <text text-anchor="middle" x="145" y="-21" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="145" y="-10" font-family="Arial" font-size="10.00">Nivel 4: Automatas finitos</text>
+<text text-anchor="middle" x="145" y="-10" font-family="Arial" font-size="10.00">Nivel 4: Autómatas finitos</text>
 </g>
 <!-- n38&#45;&gt;n39 -->
 <g id="edge26" class="edge">
@@ -800,7 +800,7 @@
 <title>n56</title>
 <path fill="#f9e79f" stroke="black" d="M559,-468C559,-468 455,-468 455,-468 449,-468 443,-462 443,-456 443,-456 443,-444 443,-444 443,-438 449,-432 455,-432 455,-432 559,-432 559,-432 565,-432 571,-438 571,-444 571,-444 571,-456 571,-456 571,-462 565,-468 559,-468"/>
 <text text-anchor="middle" x="507" y="-453" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="507" y="-442" font-family="Arial" font-size="10.00">Nivel 2: De programacion</text>
+<text text-anchor="middle" x="507" y="-442" font-family="Arial" font-size="10.00">Nivel 2: De programación</text>
 </g>
 <!-- n55&#45;&gt;n56 -->
 <g id="edge49" class="edge">
@@ -965,7 +965,7 @@
 <title>n71</title>
 <path fill="#f9e79f" stroke="black" d="M1056.5,-612C1056.5,-612 985.5,-612 985.5,-612 979.5,-612 973.5,-606 973.5,-600 973.5,-600 973.5,-588 973.5,-588 973.5,-582 979.5,-576 985.5,-576 985.5,-576 1056.5,-576 1056.5,-576 1062.5,-576 1068.5,-582 1068.5,-588 1068.5,-588 1068.5,-600 1068.5,-600 1068.5,-606 1062.5,-612 1056.5,-612"/>
 <text text-anchor="middle" x="1021" y="-597" font-family="Arial" font-size="10.00">TEXTO_LITERAL</text>
-<text text-anchor="middle" x="1021" y="-586" font-family="Arial" font-size="10.00">codigo</text>
+<text text-anchor="middle" x="1021" y="-586" font-family="Arial" font-size="10.00">código</text>
 </g>
 <!-- n69&#45;&gt;n71 -->
 <g id="edge66" class="edge">
@@ -1053,7 +1053,7 @@
 <title>n80</title>
 <path fill="#f9e79f" stroke="black" d="M934.5,-756C934.5,-756 809.5,-756 809.5,-756 803.5,-756 797.5,-750 797.5,-744 797.5,-744 797.5,-732 797.5,-732 797.5,-726 803.5,-720 809.5,-720 809.5,-720 934.5,-720 934.5,-720 940.5,-720 946.5,-726 946.5,-732 946.5,-732 946.5,-744 946.5,-744 946.5,-750 940.5,-756 934.5,-756"/>
 <text text-anchor="middle" x="872" y="-741" font-family="Arial" font-size="10.00">TEXTO</text>
-<text text-anchor="middle" x="872" y="-730" font-family="Arial" font-size="10.00">Un parrafo separa dos listas...</text>
+<text text-anchor="middle" x="872" y="-730" font-family="Arial" font-size="10.00">Un párrafo separa dos listas...</text>
 </g>
 <!-- n79&#45;&gt;n80 -->
 <g id="edge77" class="edge">

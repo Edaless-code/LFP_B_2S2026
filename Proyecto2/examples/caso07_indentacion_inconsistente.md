@@ -1,10 +1,10 @@
-# Indentacion inconsistente
+# Indentación inconsistente
 
-- Item correcto
+- Ítem correcto
     - Salta de 0 a 4 espacios sin pasar por 2
-- Item correcto
+- Ítem correcto
   - Sublista correcta
- - Regresa a 1 espacio, que no es ningun nivel
+ - Regresa a 1 espacio, que no es ningún nivel
 
 - Lista nueva
-   - Tres espacios no son un nivel valido
+   - Tres espacios no son un nivel válido

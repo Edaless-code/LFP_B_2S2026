@@ -2,6 +2,6 @@
 
 ######## Ocho tampoco
 
-###### Seis niveles si son validos
+###### Seis niveles sí son válidos
 
 #sinespacio es texto plano, no un encabezado.

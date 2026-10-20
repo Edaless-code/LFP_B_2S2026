@@ -52,7 +52,7 @@ se analiza sin errores y se traduce correctamente a HTML.
 ````markdown
 # Manual de MarkdownCheck
 
-Este documento usa **todos los elementos obligatorios** del subconjunto, con *cursiva*, `codigo en linea` y combinaciones como **negrita con *cursiva* adentro** y *cursiva con **negrita** adentro*.
+Este documento usa **todos los elementos obligatorios** del subconjunto, con *cursiva*, `código en línea` y combinaciones como **negrita con *cursiva* adentro** y *cursiva con **negrita** adentro*.
 
 ## Encabezados
 
@@ -68,19 +68,19 @@ Este documento usa **todos los elementos obligatorios** del subconjunto, con *cu
 
 - Primer nivel con guion
   * Segundo nivel con asterisco
-    + Tercer nivel con signo mas
+    + Tercer nivel con signo más
 - Otro elemento con **negrita**
 
 ## Citas
 
 > Una cita con *cursiva*.
->> Una cita anidada con `codigo`.
+>> Una cita anidada con `código`.
 
-## Codigo
+## Código
 
 ```python
 def suma(a, b):
-    # Los **asteriscos** aqui no se interpretan
+    # Los **asteriscos** aquí no se interpretan
     return a + b
 ```
 
@@ -123,13 +123,13 @@ varios niveles a la vez y la separacion de dos listas independientes.
 - Nivel 1: Lenguajes
   - Nivel 2: Formales
     - Nivel 3: Regulares
-      - Nivel 4: Automatas finitos
+      - Nivel 4: Autómatas finitos
       - Nivel 4: Expresiones regulares
     - Nivel 3: Libres de contexto
-  - Nivel 2: De programacion
-- Nivel 1: Compiladores con **negrita** y `codigo`
+  - Nivel 2: De programación
+- Nivel 1: Compiladores con **negrita** y `código`
 
-Un parrafo separa dos listas independientes.
+Un párrafo separa dos listas independientes.
 
 * Segunda lista
   + Con sublista
@@ -158,12 +158,12 @@ las citas.
 # Citas anidadas
 
 > Nivel uno de la cita.
->> Nivel dos con la notacion doble.
-> > Nivel dos con la notacion separada.
+>> Nivel dos con la notación doble.
+> > Nivel dos con la notación separada.
 >>> Nivel tres con **negrita** y *cursiva*.
 > De regreso al nivel uno.
 
-> Una segunda cita independiente con `codigo`.
+> Una segunda cita independiente con `código`.
 ```
 
 **Resultado esperado:** sin errores; `>>` y `> >` producen el mismo nivel; la
@@ -172,7 +172,7 @@ primer nivel; la linea en blanco separa dos citas independientes.
 
 **Resultado obtenido:** 36 tokens, 0 errores. Reporte 2: 2 citas, 6 lineas de
 cita, profundidad de citas 3 niveles. El Reporte 1 anida tres `<blockquote>`
-y la linea "De regreso al nivel uno" queda dentro del primero.
+y la línea "De regreso al nivel uno" queda dentro del primero.
 
 ---
 
@@ -184,14 +184,14 @@ encabezados, parrafos e items, y que el analisis continua despues de cada error.
 **Entrada** (`caso04_negrita_cursiva_sin_cerrar.md`):
 
 ```markdown
-# Titulo con **negrita sin cerrar
+# Título con **negrita sin cerrar
 
-Un parrafo con *cursiva que nunca cierra.
+Un párrafo con *cursiva que nunca cierra.
 
-- Un item con **negrita abierta
-- Un item correcto con *cursiva*
+- Un ítem con **negrita abierta
+- Un ítem correcto con *cursiva*
 
-Este parrafo es **correcto** y el analisis continua.
+Este párrafo es **correcto** y el análisis continúa.
 ```
 
 **Resultado esperado:** tres errores lexicos, cada uno en la posicion del
@@ -222,7 +222,7 @@ prioridad de `#` sin espacio.
 
 ######## Ocho tampoco
 
-###### Seis niveles si son validos
+###### Seis niveles sí son válidos
 
 #sinespacio es texto plano, no un encabezado.
 ```
@@ -250,13 +250,13 @@ bloque no se tokeniza aunque contenga simbolos de Markdown.
 **Entrada** (`caso06_bloque_codigo_sin_cerrar.md`):
 
 ````markdown
-# Bloque de codigo sin cerrar
+# Bloque de código sin cerrar
 
-Este parrafo es valido.
+Este párrafo es válido.
 
 ```python
 def nunca_cierra():
-    # Nada de esto se tokeniza: **negrita**, # titulo, - item
+    # Nada de esto se tokeniza: **negrita**, # título, - ítem
     return 0
 ````
 
@@ -285,16 +285,16 @@ impar.
 **Entrada** (`caso07_indentacion_inconsistente.md`):
 
 ```markdown
-# Indentacion inconsistente
+# Indentación inconsistente
 
-- Item correcto
+- Ítem correcto
     - Salta de 0 a 4 espacios sin pasar por 2
-- Item correcto
+- Ítem correcto
   - Sublista correcta
- - Regresa a 1 espacio, que no es ningun nivel
+ - Regresa a 1 espacio, que no es ningún nivel
 
 - Lista nueva
-   - Tres espacios no son un nivel valido
+   - Tres espacios no son un nivel válido
 ```
 
 **Resultado esperado:** tres errores sintacticos en la posicion de la vineta
@@ -322,11 +322,11 @@ ultimo `>`, en una cita simple y en una anidada.
 ```markdown
 # Citas mal formadas
 
->Falta el espacio despues del mayor que.
->>Tambien falta en la cita anidada.
+>Falta el espacio después del mayor que.
+>>También falta en la cita anidada.
 
-> Esta cita esta bien formada.
-> > Y esta tambien.
+> Esta cita está bien formada.
+> > Y esta también.
 ```
 
 **Resultado esperado:** dos errores sintacticos, en la columna del ultimo `>`
@@ -349,11 +349,11 @@ se sigue analizando.
 **Entrada** (`caso09_codigo_inline_sin_cerrar.md`):
 
 ```markdown
-# Codigo en linea sin cerrar
+# Código en línea sin cerrar
 
-Llame a la funcion `analizar() para comenzar.
+Llame a la función `analizar() para comenzar.
 
-- Item con `codigo correcto` y texto.
+- Ítem con `código correcto` y texto.
 ```
 
 **Resultado esperado:** un error en la linea 3, columna 20; el codigo en
@@ -378,11 +378,11 @@ situaciones ambiguas que no son errores.
 **Entrada** (`caso10_casos_borde.md`):
 
 ````markdown
-# Casos borde validos
+# Casos borde válidos
 
 ***Negrita y cursiva a la vez***
 
-El codigo `**no es negrita**` se toma literal.
+El código `**no es negrita**` se toma literal.
 
 #sinespacio no es encabezado y C# tampoco.
 
@@ -390,16 +390,16 @@ El codigo `**no es negrita**` se toma literal.
 
 -----
 
-Una negrita que **empieza en esta linea
-y termina en la siguiente** dentro del mismo parrafo.
+Una negrita que **empieza en esta línea
+y termina en la siguiente** dentro del mismo párrafo.
 
 ```
 ```
 
-- Item con guion
-	- Sublista indentada con tabulacion
-+ Item con signo mas
-* Item con asterisco
+- Ítem con guion
+	- Sublista indentada con tabulación
++ Ítem con signo más
+* Ítem con asterisco
 ````
 
 **Resultado esperado y obtenido:**
@@ -428,16 +428,16 @@ la seccion 4.9 en una sola pasada, ordenadas por posicion.
 **Entrada** (`caso11_multiples_errores.md`):
 
 ````markdown
-####### Encabezado invalido
+####### Encabezado inválido
 
-Parrafo con **negrita sin cerrar
+Párrafo con **negrita sin cerrar
 
-Parrafo con *cursiva sin cerrar
+Párrafo con *cursiva sin cerrar
 
-Parrafo con `codigo sin cerrar
+Párrafo con `código sin cerrar
 
-- Item
-    - Indentacion invalida
+- Ítem
+    - Indentación inválida
 
 >Cita mal formada
 
@@ -535,24 +535,24 @@ relativa y resaltado de sintaxis.
 
 ## Lista ordenada con tareas
 
-1. Disenar la gramatica
+1. Diseñar la gramática
   - [x] Definir los tokens
   - [x] Dibujar el AFD
 2. Implementar el analizador
-  - [ ] Pruebas de integracion
+  - [ ] Pruebas de integración
 3. Entregar el proyecto
 
 ## Texto tachado
 
 La entrega ~~era el viernes~~ es el lunes.
 
-## Enlaces e imagenes
+## Enlaces e imágenes
 
-Consulte la [guia de **Markdown**](https://www.markdownguide.org/basic-syntax/) y la [documentacion de Graphviz](https://graphviz.org/doc/info/lang.html).
+Consulte la [guía de **Markdown**](https://www.markdownguide.org/basic-syntax/) y la [documentación de Graphviz](https://graphviz.org/doc/info/lang.html).
 
-![Arbol de derivacion del caso 12](../docs/imagenes/arbol_caso12.png)
+![Árbol de derivación del caso 12](../docs/imagenes/arbol_caso12.png)
 
-## Codigo con resaltado de sintaxis
+## Código con resaltado de sintaxis
 
 ```python
 def saludo(nombre):
@@ -570,7 +570,7 @@ carpeta del reporte, y el bloque de codigo coloreado por highlight.js.
 3 tareas (2 completadas), 1 tachado, 2 enlaces y 1 imagen. En el Reporte 1:
 
 - `<ol>` contiene `<li class="tarea"><input type="checkbox" disabled checked>Definir los tokens</li>`.
-- `<a href="https://www.markdownguide.org/basic-syntax/">guia de <strong>Markdown</strong></a>`.
+- `<a href="https://www.markdownguide.org/basic-syntax/">guía de <strong>Markdown</strong></a>`.
 - `<img src="../../examples/../docs/imagenes/arbol_caso12.png" ...>`: la ruta
   se ajusto desde `salidas/caso15_alcance_opcional/` y la imagen se muestra.
 - El reporte carga highlight.js porque el documento tiene un bloque de codigo.
@@ -592,9 +592,9 @@ Este ~~tachado nunca se cierra.
 
 - [x] Una tarea con **negrita abierta
 
-[Un enlace](sin cierre de parentesis
+[Un enlace](sin cierre de paréntesis
 1. Uno
-     2. Indentacion invalida en una lista ordenada
+     2. Indentación inválida en una lista ordenada
 ```
 
 **Resultado esperado:** tres errores; la linea 7 (enlace sin parentesis de

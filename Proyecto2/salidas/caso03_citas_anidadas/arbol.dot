@@ -24,12 +24,12 @@ digraph ArbolDerivacion {
     n18 [label="<linea_cita>", fillcolor="#D6EAF8"];
     n19 [label="CITA\n>>", fillcolor="#F9E79F"];
     n20 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n21 [label="TEXTO\nNivel dos con la notacion do...", fillcolor="#F9E79F"];
+    n21 [label="TEXTO\nNivel dos con la notación do...", fillcolor="#F9E79F"];
     n22 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n23 [label="<linea_cita>", fillcolor="#D6EAF8"];
     n24 [label="CITA\n> >", fillcolor="#F9E79F"];
     n25 [label="<en_linea>", fillcolor="#D6EAF8"];
-    n26 [label="TEXTO\nNivel dos con la notacion se...", fillcolor="#F9E79F"];
+    n26 [label="TEXTO\nNivel dos con la notación se...", fillcolor="#F9E79F"];
     n27 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];
     n28 [label="<cita>", fillcolor="#D6EAF8"];
     n29 [label="<linea_cita>", fillcolor="#D6EAF8"];
@@ -65,7 +65,7 @@ digraph ArbolDerivacion {
     n59 [label="TEXTO\nUna segunda cita independien...", fillcolor="#F9E79F"];
     n60 [label="<codigo_inline>", fillcolor="#D6EAF8"];
     n61 [label="CODIGO_INLINE\n`", fillcolor="#F9E79F"];
-    n62 [label="TEXTO_LITERAL\ncodigo", fillcolor="#F9E79F"];
+    n62 [label="TEXTO_LITERAL\ncódigo", fillcolor="#F9E79F"];
     n63 [label="CODIGO_INLINE\n`", fillcolor="#F9E79F"];
     n64 [label="TEXTO\n.", fillcolor="#F9E79F"];
     n65 [label="SALTO_LINEA\n\\n", fillcolor="#F9E79F"];

@@ -1,8 +1,8 @@
-# Casos borde validos
+# Casos borde válidos
 
 ***Negrita y cursiva a la vez***
 
-El codigo `**no es negrita**` se toma literal.
+El código `**no es negrita**` se toma literal.
 
 #sinespacio no es encabezado y C# tampoco.
 
@@ -10,13 +10,13 @@ El codigo `**no es negrita**` se toma literal.
 
 -----
 
-Una negrita que **empieza en esta linea
-y termina en la siguiente** dentro del mismo parrafo.
+Una negrita que **empieza en esta línea
+y termina en la siguiente** dentro del mismo párrafo.
 
 ```
 ```
 
-- Item con guion
-	- Sublista indentada con tabulacion
-+ Item con signo mas
-* Item con asterisco
+- Ítem con guion
+	- Sublista indentada con tabulación
++ Ítem con signo más
+* Ítem con asterisco
