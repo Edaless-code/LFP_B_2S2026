@@ -129,6 +129,18 @@ Tokens de apoyo agregados a la seccion 4.5 del enunciado:
 | SALTO_LINEA | Salto de linea que cierra una linea de bloque | Delimita el contenido en linea de encabezados, items y citas; sin el, el parser no sabria donde termina un item |
 | FIN_ARCHIVO | Virtual, al agotarse la entrada | Simbolo de fin de cadena de la gramatica aumentada |
 
+Tokens del alcance opcional (seccion 4.2 del enunciado):
+
+| Token | Regla | Ejemplo |
+|---|---|---|
+| ENUMERADOR | Uno o mas digitos y un punto al inicio de linea, seguidos de un espacio | `1.` |
+| CASILLA | `[ ]`, `[x]` o `[X]` justo despues de una VIÑETA o un ENUMERADOR, seguida de espacio o fin de linea | `[x]` |
+| TACHADO | Dos virgulillas | `~~` |
+| CORCHETE_ABRE | `[` que inicia un enlace completo `[texto](url)` | `[` |
+| IMAGEN_ABRE | `![` que inicia una imagen completa `![alt](url)` | `![` |
+| CORCHETE_CIERRA | `]` que cierra el texto de un enlace o imagen | `]` |
+| URL | Destino entre parentesis, sin espacios | `(https://graphviz.org)` |
+
 ### 2.3 Reglas de prioridad
 
 1. **Vineta contra cursiva.** `-`, `*` y `+` solo forman VIÑETA al inicio de
@@ -147,6 +159,16 @@ Tokens de apoyo agregados a la seccion 4.5 del enunciado:
    forman CERCA_CODIGO; uno solo en cualquier posicion forma CODIGO_INLINE.
 6. **Modo literal.** Dentro de un bloque de codigo o de un codigo en linea no
    se reconoce ningun otro token hasta el delimitador de cierre.
+7. **Enumerador contra texto.** Un numero solo forma ENUMERADOR al inicio de
+   linea, seguido de un punto y un espacio. `2024. Fue` a mitad de linea o
+   `1.sinespacio` son TEXTO.
+8. **Tachado contra texto.** Solo `~~` forma TACHADO; una virgulilla sola es
+   TEXTO (`aprox ~5 km`).
+9. **Enlace contra texto.** Un `[` solo forma CORCHETE_ABRE si en el mismo
+   bloque aparece el patron completo `[texto](url)`: texto sin saltos de linea
+   ni corchetes, `]` seguido de `(`, y un destino sin espacios cerrado con `)`.
+   En cualquier otro caso los corchetes y parentesis son TEXTO y no se reporta
+   error. Lo mismo aplica a `![` para las imagenes.
 
 ---
 
@@ -158,7 +180,8 @@ Tokens de apoyo agregados a la seccion 4.5 del enunciado:
 
 Fuente del diagrama: `docs/imagenes/afd.dot`.
 
-El automata se divide en cuatro contextos. Cada contexto es un sub-automata con
+El automata se divide en cinco contextos (el quinto, la casilla de tarea,
+pertenece al alcance opcional). Cada contexto es un sub-automata con
 su propio estado inicial; el analizador cambia de contexto despues de emitir
 ciertos tokens (seccion 3.3). Esta division corresponde a la estructura de
 Markdown: los marcadores de bloque solo tienen significado al inicio de linea,
@@ -195,6 +218,19 @@ Convenciones del diagrama:
 | G4 | Espacios despues de los guiones | `esp` -> G4, `\n` -> REGLA_HORIZONTAL, `otro` -> T |
 | AS | Se leyo `*` al inicio (acepta CURSIVA) | `esp` -> VIÑETA, `*` -> N2 |
 | MS | Se leyo `+` | `esp` -> VIÑETA, `otro` -> T |
+| D1 | Se leyeron uno o mas digitos | `digito` -> D1, `.` -> D2, `otro` -> T |
+| D2 | Digitos y punto | `esp` -> ENUMERADOR, `otro` -> T |
+
+**Contexto: casilla de tarea** (despues de una VIÑETA o un ENUMERADOR)
+
+| Estado | Significado | Transiciones |
+|---|---|---|
+| X0 | Inicio del contenido del item | `[` -> X1; cualquier otro caracter pasa al contexto en linea |
+| X1 | Se leyo `[` | `esp`, `x`, `X` -> X2 |
+| X2 | Se leyo la marca | `]` -> CASILLA si despues hay espacio o fin de linea |
+
+Si la secuencia no se completa, no se emite CASILLA y el contenido se
+tokeniza desde X0 en el contexto en linea.
 
 En G3 y G4 el `\n` solo confirma la regla horizontal; no forma parte de su
 lexema y se devuelve a la entrada para emitirse como SALTO_LINEA.
@@ -203,12 +239,25 @@ lexema y se devuelve a la entrada para emitirse como SALTO_LINEA.
 
 | Estado | Significado | Transiciones |
 |---|---|---|
-| E0 | Inicio de un token en linea | `*` -> I1, `` ` `` -> K1, `\n` -> SL, `otro` -> T |
+| E0 | Inicio de un token en linea | `*` -> I1, `` ` `` -> K1, `~` -> V1, `[` -> P1, `!` -> M1, `]` -> P2, `\n` -> SL, `otro` -> T |
 | T | Texto (acepta TEXTO) | `otro` -> T; `\n` -> T si la linea siguiente continua el parrafo |
 | I1 | Un asterisco (acepta CURSIVA) | `*` -> N2 |
 | N2 | Dos asteriscos (acepta NEGRITA) | ninguna |
 | K1 | Acento grave de apertura (acepta CODIGO_INLINE) | `` ` `` -> K2 (codigo vacio) |
 | SL | Fin de linea de bloque (acepta SALTO_LINEA) | ninguna |
+| V1 | Una virgulilla | `~` -> V2, `otro` -> T |
+| V2 | Dos virgulillas (acepta TACHADO) | ninguna |
+| P1 | Corchete de apertura de un enlace (acepta CORCHETE_ABRE) | ninguna; el texto del enlace se tokeniza desde E0 |
+| M1 | Exclamacion de una imagen | `[` -> M2 |
+| M2 | Inicio de imagen (acepta IMAGEN_ABRE) | ninguna; el texto alternativo se emite como un TEXTO |
+| P2 | Corchete de cierre (acepta CORCHETE_CIERRA) | `(` -> U1 |
+| U1 | Destino del enlace | `otro` (sin espacios) -> U1, `)` -> U2 |
+| U2 | Parentesis de cierre (acepta URL) | ninguna |
+
+Las transiciones de `[`, `!` y `]` solo se toman cuando el patron completo del
+enlace esta presente en el bloque (regla 9 de la seccion 2.3). El analizador
+lo verifica antes de tokenizar el bloque, con una pasada que localiza todos
+los enlaces completos.
 
 **Contexto: literal de codigo en linea**
 
@@ -298,10 +347,15 @@ tokeniza un bloque completo antes de entregar sus tokens. Un bloque es una
 linea de encabezado, una linea de item de lista, una linea de cita o un
 parrafo completo (que puede ocupar varias lineas).
 
-Mientras tokeniza el bloque mantiene una pila de delimitadores abiertos. Al
-terminar el bloque, cada delimitador que siga abierto se reporta como error en
-su posicion de apertura y se reclasifica como TEXTO. Asi el parser recibe una
-secuencia bien formada y el analisis continua sin errores en cascada.
+Mientras tokeniza el bloque mantiene una pila de delimitadores abiertos
+(NEGRITA, CURSIVA y TACHADO). Al terminar el bloque, cada delimitador que siga
+abierto se reporta como error en su posicion de apertura y se reclasifica como
+TEXTO. Asi el parser recibe una secuencia bien formada y el analisis continua
+sin errores en cascada.
+
+El texto de un enlace se tokeniza como un rango independiente, con su propia
+pila. Por eso un enfasis abierto dentro de un enlace debe cerrarse antes del
+`]`; si cruza el borde del enlace se reporta como sin cerrar.
 
 ### 3.6 Parrafos de varias lineas
 
@@ -322,11 +376,14 @@ G = (N, T, P, S), donde:
 
 - **T (terminales):** NUMERAL, VIÑETA, INDENT, DEDENT, CITA, CERCA_CODIGO,
   LENGUAJE, TEXTO_LITERAL, REGLA_HORIZONTAL, NEGRITA, CURSIVA, CODIGO_INLINE,
-  TEXTO, SALTO_LINEA, SALTO_PARRAFO, FIN_ARCHIVO.
+  TEXTO, SALTO_LINEA, SALTO_PARRAFO, FIN_ARCHIVO; y del alcance opcional
+  ENUMERADOR, CASILLA, TACHADO, CORCHETE_ABRE, IMAGEN_ABRE, CORCHETE_CIERRA y
+  URL.
 - **N (no terminales):** `<documento>`, `<bloque>`, `<separador>`,
   `<encabezado>`, `<parrafo>`, `<lista>`, `<item_lista>`, `<sublista>`,
   `<cita>`, `<linea_cita>`, `<bloque_codigo>`, `<regla_horizontal>`,
-  `<en_linea>`, `<negrita>`, `<cursiva>`, `<codigo_inline>`.
+  `<en_linea>`, `<negrita>`, `<cursiva>`, `<codigo_inline>`; y del alcance
+  opcional `<tachado>`, `<enlace>` e `<imagen>`.
 - **S (simbolo inicial):** `<documento>`.
 
 ### 4.2 Producciones
@@ -351,11 +408,11 @@ Se usa notacion EBNF: `{ X }` significa cero o mas repeticiones de X y
 
 <parrafo>          ::= <en_linea>(∅) SALTO_LINEA
 
-<lista>            ::= <item_lista> { <item_lista> }
+<lista>(m)         ::= <item_lista>(m) { <item_lista>(m) }       m ∈ {VIÑETA, ENUMERADOR}
 
-<item_lista>       ::= VIÑETA <en_linea>(∅) SALTO_LINEA [ <sublista> ]
+<item_lista>(m)    ::= m [ CASILLA ] <en_linea>(∅) SALTO_LINEA [ <sublista> ]
 
-<sublista>         ::= INDENT <lista> DEDENT
+<sublista>         ::= INDENT <lista> { <lista> } DEDENT
 
 <cita>(n)          ::= <elemento_cita>(n) { <elemento_cita>(n) }
 <elemento_cita>(n) ::= <linea_cita>(n)            si nivel(CITA) = n
@@ -367,11 +424,20 @@ Se usa notacion EBNF: `{ X }` significa cero o mas repeticiones de X y
 
 <regla_horizontal> ::= REGLA_HORIZONTAL SALTO_LINEA
 
-<en_linea>(A)      ::= { <negrita>(A) | <cursiva>(A) | <codigo_inline> | TEXTO }
+<en_linea>(A)      ::= { <negrita>(A) | <cursiva>(A) | <tachado>(A) | <codigo_inline>
+                       | <enlace> | <imagen> | TEXTO }
 <negrita>(A)       ::= NEGRITA <en_linea>(A ∪ {NEGRITA}) NEGRITA     si NEGRITA ∉ A
 <cursiva>(A)       ::= CURSIVA <en_linea>(A ∪ {CURSIVA}) CURSIVA     si CURSIVA ∉ A
+<tachado>(A)       ::= TACHADO <en_linea>(A ∪ {TACHADO}) TACHADO     si TACHADO ∉ A
 <codigo_inline>    ::= CODIGO_INLINE [ TEXTO_LITERAL ] CODIGO_INLINE
+<enlace>           ::= CORCHETE_ABRE <en_linea>(∅) CORCHETE_CIERRA URL
+<imagen>           ::= IMAGEN_ABRE [ TEXTO ] CORCHETE_CIERRA URL
 ```
+
+Las producciones de `<lista>`, `<item_lista>` y `<sublista>` y las de
+`<tachado>`, `<enlace>` e `<imagen>` incluyen el alcance opcional. Sin el, la
+gramatica se reduce a la version minima: `m` = VIÑETA, sin CASILLA, una sola
+`<lista>` por `<sublista>` y sin los tres no terminales nuevos.
 
 `<elemento_cita>` es solo una seleccion entre dos alternativas y no genera un
 nodo en el arbol; los hijos de `<cita>` son directamente `<linea_cita>` y
@@ -379,7 +445,7 @@ nodo en el arbol; los hijos de `<cita>` son directamente `<linea_cita>` y
 
 ### 4.3 Atributos heredados
 
-Dos no terminales llevan un parametro. Cada parametro toma un numero finito de
+Tres no terminales llevan un parametro. Cada parametro toma un numero finito de
 valores, por lo que la gramatica sigue siendo libre de contexto: equivale a
 escribir una copia del no terminal por cada valor.
 
@@ -388,8 +454,12 @@ escribir una copia del no terminal por cada valor.
   abre una `<cita>(n+1)` dentro de la actual (recursion directa); una de nivel
   menor la cierra. Asi `> a`, `>> b`, `> c` produce una cita con `a`, una cita
   anidada con `b` y luego `c`, igual que el HTML esperado.
+- **`m` en `<lista>(m)`: tipo de marcador.** Lo fija el primer item. La lista
+  continua mientras los items usen el mismo marcador; un cambio de VIÑETA a
+  ENUMERADOR (o al reves) en el mismo nivel inicia otra lista, que se traduce
+  a `<ul>` u `<ol>` respectivamente.
 - **`A` en `<en_linea>(A)`: delimitadores abiertos.** `A` es un subconjunto de
-  {NEGRITA, CURSIVA}. Dentro de una negrita no se puede abrir otra negrita, por
+  {NEGRITA, CURSIVA, TACHADO}. Dentro de una negrita no se puede abrir otra negrita, por
   lo que un token NEGRITA dentro de `<en_linea>({NEGRITA})` solo puede ser el
   cierre. Esto elimina la ambiguedad entre abrir y cerrar y deja la gramatica
   LL(1). La recursion mutua negrita-cursiva se mantiene: una negrita puede
@@ -429,8 +499,8 @@ Las producciones recursivas de la referencia son de dos tipos:
 | No terminal | PRIMERO |
 |---|---|
 | `<encabezado>` | NUMERAL |
-| `<parrafo>` | TEXTO, NEGRITA, CURSIVA, CODIGO_INLINE |
-| `<lista>`, `<item_lista>` | VIÑETA |
+| `<parrafo>` | TEXTO, NEGRITA, CURSIVA, TACHADO, CODIGO_INLINE, CORCHETE_ABRE, IMAGEN_ABRE |
+| `<lista>(m)`, `<item_lista>(m)` | m (VIÑETA o ENUMERADOR) |
 | `<sublista>` | INDENT |
 | `<cita>(n)`, `<linea_cita>(n)` | CITA |
 | `<bloque_codigo>` | CERCA_CODIGO |
@@ -438,7 +508,10 @@ Las producciones recursivas de la referencia son de dos tipos:
 | `<separador>` | SALTO_PARRAFO |
 | `<negrita>(A)` | NEGRITA |
 | `<cursiva>(A)` | CURSIVA |
+| `<tachado>(A)` | TACHADO |
 | `<codigo_inline>` | CODIGO_INLINE |
+| `<enlace>` | CORCHETE_ABRE |
+| `<imagen>` | IMAGEN_ABRE |
 
 Verificacion de las decisiones del parser:
 
@@ -446,15 +519,24 @@ Verificacion de las decisiones del parser:
   son disjuntos dos a dos. Un solo token decide la produccion.
 - **Repeticion en `<documento>`:** continua mientras el token pertenezca a
   PRIMERO(`<bloque>`) y termina en FIN_ARCHIVO, que no pertenece a ese conjunto.
-- **Repeticion en `<lista>`:** continua con VIÑETA. Despues de una lista nunca
-  sigue una VIÑETA, porque el analizador lexico solo termina una lista con
-  DEDENT, una linea de otro tipo, una linea en blanco o el fin del archivo.
+- **Repeticion en `<lista>(m)`:** continua mientras el token sea el mismo
+  marcador m. Despues de una lista nunca sigue ese mismo marcador: el
+  analizador lexico solo termina una lista con DEDENT, una linea de otro tipo,
+  una linea en blanco o el fin del archivo, y el parser la termina cuando
+  cambia el marcador.
+- **Repeticion en `<sublista>`:** continua con VIÑETA o ENUMERADOR y termina
+  con DEDENT, que no pertenece a PRIMERO(`<lista>`).
+- **`[ CASILLA ]`:** CASILLA no pertenece a PRIMERO(`<en_linea>`).
+- **Dentro de `<enlace>`:** el texto se analiza con `<en_linea>(∅)` y la
+  repeticion termina con CORCHETE_CIERRA, que no pertenece a
+  PRIMERO(`<en_linea>`). El analizador lexico no emite CORCHETE_ABRE dentro del
+  texto de un enlace, por lo que no hay enlaces anidados.
 - **`[ <sublista> ]`:** se elige con INDENT, que no pertenece a SIGUIENTE(`<item_lista>`)
   = {VIÑETA, DEDENT} ∪ PRIMERO(`<bloque>`) ∪ {FIN_ARCHIVO}.
 - **Repeticion en `<en_linea>(A)`:** continua con TEXTO, CODIGO_INLINE y los
   delimitadores que no estan en A. Se detiene con SALTO_LINEA o con un
   delimitador que esta en A (el cierre de la construccion que lo contiene).
-  Ambos conjuntos son disjuntos para cada uno de los cuatro valores de A.
+  Ambos conjuntos son disjuntos para cada uno de los ocho valores de A.
 - **`<elemento_cita>(n)`:** se decide con el nivel del token CITA actual
   (igual a n, mayor que n o menor que n, este ultimo termina la repeticion).
 
@@ -481,6 +563,9 @@ devuelve el `NodoAST` de esa produccion:
 | `<negrita>(A)` | `negrita(abiertos)` |
 | `<cursiva>(A)` | `cursiva(abiertos)` |
 | `<codigo_inline>` | `codigo_inline()` |
+| `<tachado>(A)` | `tachado(abiertos)` |
+| `<enlace>` | `enlace()` |
+| `<imagen>` | `imagen()` |
 
 ---
 
@@ -499,6 +584,7 @@ interfaz.
 |---|---|---|
 | NEGRITA_SIN_CERRAR | El bloque termina con `**` en la pila de delimitadores | Se reporta en la posicion de apertura y el `**` se reclasifica como TEXTO |
 | CURSIVA_SIN_CERRAR | El bloque termina con `*` en la pila de delimitadores | Igual que la negrita |
+| TACHADO_SIN_CERRAR | El bloque termina con `~~` en la pila de delimitadores (alcance opcional) | Igual que la negrita |
 | CODIGO_INLINE_SIN_CERRAR | El bloque termina sin un segundo acento grave | Se reporta en la posicion de apertura; el acento grave se emite como TEXTO y el resto se tokeniza normalmente |
 | BLOQUE_CODIGO_SIN_CERRAR | Se llega al fin del archivo en el contexto literal de bloque | Se reporta en la linea de la cerca de apertura; el contenido restante se emite como TEXTO_LITERAL |
 | ENCABEZADO_INVALIDO | Mas de 6 `#` seguidos de espacio (estado H7) | Se reporta y la linea se analiza como un parrafo |
@@ -582,19 +668,35 @@ HTML a partir de los fragmentos de sus hijos:
 |---|---|
 | `<encabezado>` | `<hN id="ancla">...</hN>`, con N = cantidad de `#` del token NUMERAL |
 | `<parrafo>` | `<p>...</p>` |
-| `<lista>` | `<ul>...</ul>` |
-| `<item_lista>` | `<li>contenido` + sublista + `</li>` |
+| `<lista>` | `<ul>...</ul>`; `<ol>...</ol>` si los items usan ENUMERADOR, con `start` si no empieza en 1 |
+| `<item_lista>` | `<li>contenido` + sublista + `</li>`; con CASILLA, `<li class="tarea"><input type="checkbox" disabled [checked]>` |
 | `<cita>` | `<blockquote>...</blockquote>` (anidado igual que en el arbol) |
 | `<linea_cita>` | `<p>...</p>` |
 | `<bloque_codigo>` | `<pre><code class="language-x">...</code></pre>` |
 | `<regla_horizontal>` | `<hr>` |
 | `<negrita>`, `<cursiva>` | `<strong>`, `<em>` |
 | `<codigo_inline>` | `<code>...</code>` |
+| `<tachado>` | `<del>...</del>` |
+| `<enlace>` | `<a href="destino">...</a>` |
+| `<imagen>` | `<img src="destino" alt="texto">` |
 | Hoja TEXTO | Texto con `&`, `<` y `>` escapados |
 
 Como la traduccion es recursiva, las combinaciones (cursiva dentro de negrita,
 negrita dentro de un item de una sublista, etc.) se producen sin reglas
 especiales.
+
+**Rutas relativas.** En Markdown, el destino de una imagen o enlace relativo
+parte de la carpeta del documento, pero el reporte se guarda en
+`salidas/<archivo>/`. `GeneradorReportes` calcula la ruta desde la carpeta del
+reporte hasta la del documento y `GeneradorHTML` la antepone a los destinos
+relativos. Los destinos con esquema (`https:`, `mailto:`), absolutos o anclas
+(`#`) no se modifican.
+
+**Resaltado de sintaxis (alcance opcional).** Si el documento tiene bloques de
+codigo, el Reporte 1 carga highlight.js 11.9.0 desde cdnjs y colorea el
+contenido de cada `<pre><code class="language-x">`. Es solo visual: el
+contenido ya esta escapado y la deteccion del bloque no cambia. Sin conexion a
+internet el codigo se muestra igual, sin colores.
 
 ### 7.2 Reporte 2: estadisticas
 
@@ -602,7 +704,9 @@ especiales.
 parametros la profundidad actual de listas y de citas. Las palabras se cuentan
 en las hojas TEXTO; el contenido de codigo no se cuenta. Con esta regla el
 archivo de ejemplo da exactamente los valores que muestra el enunciado
-(67 palabras, 2 parrafos, 8 items, etc.).
+(67 palabras, 2 parrafos, 8 items, etc.). Del alcance opcional tambien cuenta
+tachados, enlaces, imagenes, listas ordenadas y tareas (totales y
+completadas).
 
 ### 7.3 Reporte 3: tabla de contenido
 
@@ -618,11 +722,25 @@ no tiene encabezados, el reporte lo indica con un mensaje.
 La pestana Vista previa muestra el mismo HTML del Reporte 1 en un
 `QTextBrowser`, sin salir de la aplicacion.
 
+### 7.5 Analisis en vivo y advertencia de anidamiento (alcance opcional)
+
+- **Analisis en vivo.** Con el boton *En vivo* activo, cada cambio en el
+  editor reinicia un `QTimer` de 500 ms; cuando el usuario deja de escribir se
+  ejecuta el analisis completo y se actualizan tablas, arbol, vista previa y
+  reportes. Mientras se escribe no se cambia de pestana.
+- **Advertencia de anidamiento.** `buscar_anidamiento_excesivo()`
+  (`analizador/advertencias.py`) recorre el arbol y devuelve una advertencia
+  por cada lista o cita que supera la profundidad configurada en el selector
+  *Anidamiento max.* de la barra de herramientas (3 por defecto). No es un
+  error: el documento sigue siendo valido y los reportes se generan; la
+  interfaz muestra el mensaje de resultado en amarillo con el nivel alcanzado
+  y la linea.
+
 ---
 
 ## 8. Pruebas
 
-La carpeta `tests/` contiene 97 pruebas unitarias con `unittest`:
+La carpeta `tests/` contiene 124 pruebas unitarias con `unittest`:
 
 | Archivo | Pruebas | Cobertura |
 |---|---|---|
@@ -630,13 +748,35 @@ La carpeta `tests/` contiene 97 pruebas unitarias con `unittest`:
 | `test_sintactico.py` | 28 | Estructura del arbol, anidamiento de listas, citas y enfasis, errores sintacticos y analisis en una sola pasada |
 | `test_reportes.py` | 19 | HTML del Reporte 1, anclas, estadisticas del ejemplo, indice, archivo DOT y escritura de archivos |
 | `test_cargador.py` | 6 | Validacion y lectura de archivos |
+| `test_opcionales.py` | 27 | Listas ordenadas, tareas, tachado, enlaces, imagenes, rutas relativas, resaltado de sintaxis y advertencias de anidamiento |
 
 Los casos de prueba de extremo a extremo, con entrada, resultado esperado y
 resultado obtenido, estan en `docs/CASOS_PRUEBA.md`.
 
 ---
 
-## 9. Decisiones de Diseno
+## 9. Alcance Opcional
+
+| Elemento (seccion 4.2) | Implementacion |
+|---|---|
+| Listas ordenadas (`1. 2. 3.`) | Token ENUMERADOR (estados D1-D2), atributo m de `<lista>(m)`, traduccion a `<ol>` con `start` |
+| Enlaces e imagenes | Tokens CORCHETE_ABRE, IMAGEN_ABRE, CORCHETE_CIERRA y URL (estados P1-P2, M1-M2, U1-U2); producciones `<enlace>` e `<imagen>`; `<a>` e `<img>` con rutas relativas ajustadas |
+| Texto tachado (`~~texto~~`) | Token TACHADO (estados V1-V2), produccion `<tachado>(A)`, error TACHADO_SIN_CERRAR, `<del>` |
+| Listas de tareas (`- [ ]`, `- [x]`) | Token CASILLA (estados X0-X3), `[ CASILLA ]` en `<item_lista>`, casilla deshabilitada en el Reporte 1 y conteo en el Reporte 2 |
+| Vista previa en vivo | Pestana Vista previa y analisis automatico al dejar de escribir (seccion 7.5) |
+| Advertencia de anidamiento configurable | Selector de profundidad maxima y `buscar_anidamiento_excesivo()` (seccion 7.5) |
+| Resaltado de sintaxis en el Reporte 1 | highlight.js desde CDN, solo visual (seccion 7.1) |
+
+No se implementaron las tablas Markdown delimitadas con `|`.
+
+Todos los elementos opcionales siguen la misma arquitectura que los
+obligatorios: el AFD los reconoce, el parser los incorpora al arbol con su
+propia produccion y los reportes se generan recorriendo el arbol. Los casos de
+prueba 15 y 16 (`docs/CASOS_PRUEBA.md`) los cubren.
+
+---
+
+## 10. Decisiones de Diseno
 
 | Decision | Justificacion |
 |---|---|
