@@ -25,7 +25,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from nucleo.modelos import Coincidencia
-from nucleo.texto import normalizar, palabras, palabras_significativas, similitud_palabras
+from nucleo.texto import normalizar, palabras, palabras_consulta, similitud_palabras
 
 UMBRAL_PALABRA = 0.78
 MAX_LINEAS_CANDIDATAS = 60
@@ -111,7 +111,7 @@ class BuscadorCanciones:
 
     # ============================================================== busqueda
     def preparar_consulta(self, texto: str) -> list[str]:
-        return palabras_significativas(texto)
+        return palabras_consulta(texto)
 
     def buscar(
         self,

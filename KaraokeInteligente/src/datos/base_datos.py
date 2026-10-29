@@ -91,6 +91,13 @@ INDICES = (
     "CREATE INDEX IF NOT EXISTS ix_letras_temp ON LETRAS_TEMP(id_temp, numero_linea)",
 )
 
+# Columnas escritas con tilde (como en el enunciado) que se renombran al nombre usado
+# por el programa, por si la base fue creada a mano con esos nombres.
+COLUMNAS_CON_TILDE = {
+    "NOMBRES": (("código", "codigo"), ("nombre_canción", "nombre_cancion")),
+    "LETRAS": (("código", "codigo"), ("línea", "linea")),
+}
+
 # Columnas que se agregan si la tabla ya existia sin ellas.
 COLUMNAS_EXTRA = {
     "NOMBRES": (
@@ -146,8 +153,8 @@ class BaseDatos:
                 pass
             os.replace(self.ruta, respaldo)
             self.mensajes.append(
-                f"La base de datos estaba danada ({error}); se respaldo como {os.path.basename(respaldo)} "
-                "y se creo una nueva."
+                f"La base de datos estaba dañada ({error}); se respaldó como {os.path.basename(respaldo)} "
+                "y se creó una nueva."
             )
             self.existia = False
             return self._conectar()
@@ -158,6 +165,7 @@ class BaseDatos:
                 fila[0]
                 for fila in self.conexion.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
             }
+            self._renombrar_columnas_con_tilde(existentes)
             for tabla, sentencia in TABLAS.items():
                 if tabla not in existentes:
                     self.tablas_creadas.append(tabla)
@@ -170,13 +178,23 @@ class BaseDatos:
                 (str(VERSION_ESQUEMA),),
             )
         if not self.existia:
-            self.mensajes.append(f"No existia la base de datos CANCIONES: se creo con {len(TABLAS)} tablas.")
+            self.mensajes.append(f"No existía la base de datos CANCIONES: se creó con {len(TABLAS)} tablas.")
         elif self.tablas_creadas:
             self.mensajes.append(
                 "Base de datos CANCIONES encontrada; se agregaron las tablas: " + ", ".join(self.tablas_creadas)
             )
         else:
             self.mensajes.append("Base de datos CANCIONES encontrada y lista para usarse.")
+
+    def _renombrar_columnas_con_tilde(self, existentes: set[str]) -> None:
+        for tabla, pares in COLUMNAS_CON_TILDE.items():
+            if tabla not in existentes:
+                continue
+            actuales = {fila[1] for fila in self.conexion.execute(f"PRAGMA table_info({tabla})")}
+            for con_tilde, sin_tilde in pares:
+                if con_tilde in actuales and sin_tilde not in actuales:
+                    self.conexion.execute(f'ALTER TABLE {tabla} RENAME COLUMN "{con_tilde}" TO {sin_tilde}')
+                    self.mensajes.append(f"Se renombró la columna {tabla}.{con_tilde} a {sin_tilde}.")
 
     def _agregar_columnas_faltantes(self) -> None:
         for tabla, columnas in COLUMNAS_EXTRA.items():

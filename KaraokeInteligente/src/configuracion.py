@@ -26,6 +26,7 @@ from typing import Any
 from plataforma import directorio_datos, directorio_programa
 
 NOMBRE_BASE_DATOS = "CANCIONES.db"
+NOMBRES_ALTERNATIVOS_BASE_DATOS = ("CANCIONES", "CANCIONES.sqlite", "CANCIONES.sqlite3")
 NOMBRE_PROGRAMA = "PROGRAMA.txt"
 NOMBRE_CONFIGURACION = "config.json"
 
@@ -81,11 +82,24 @@ class Configuracion:
     # ------------------------------------------------------------------ rutas
     @property
     def ruta_base_datos(self) -> str:
-        return os.path.join(self.directorio, NOMBRE_BASE_DATOS)
+        """CANCIONES.db; si no existe pero hay una base llamada CANCIONES (sin extension,
+        .sqlite o .sqlite3) en la misma carpeta, se usa esa."""
+        principal = os.path.join(self.directorio, NOMBRE_BASE_DATOS)
+        if not os.path.exists(principal):
+            for alternativo in NOMBRES_ALTERNATIVOS_BASE_DATOS:
+                ruta = os.path.join(self.directorio, alternativo)
+                if os.path.isfile(ruta) and os.path.getsize(ruta) > 0:
+                    return ruta
+        return principal
 
     @property
     def ruta_programa(self) -> str:
-        return os.path.join(self.directorio, NOMBRE_PROGRAMA)
+        """PROGRAMA.txt; si no existe pero hay un archivo llamado PROGRAMA (sin extension), se usa ese."""
+        principal = os.path.join(self.directorio, NOMBRE_PROGRAMA)
+        sin_extension = os.path.join(self.directorio, "PROGRAMA")
+        if not os.path.exists(principal) and os.path.isfile(sin_extension):
+            return sin_extension
+        return principal
 
     @property
     def ruta_ejemplos(self) -> str:

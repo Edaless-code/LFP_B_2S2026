@@ -59,9 +59,17 @@ def palabras(texto: str) -> list[str]:
 def es_relleno(palabra: str) -> bool:
     if palabra in RELLENOS:
         return True
-    # "laaaa", "ooooh", "nananana"
-    if len(set(palabra)) <= 2 and len(palabra) >= 3:
-        return True
+    # "laaaa", "ooooh", "mmmm": en espanol ninguna palabra repite una letra tres veces seguidas.
+    for i in range(len(palabra) - 2):
+        if palabra[i] == palabra[i + 1] == palabra[i + 2]:
+            return True
+    # "lalala", "nanana", "lerelere": una silaba de 1 o 2 letras repetida tres veces o mas.
+    # Se exigen tres repeticiones para no descartar palabras reales como mama, papa o bebe.
+    for largo in (1, 2):
+        silaba = palabra[:largo]
+        veces = len(palabra) // largo
+        if veces >= 3 and len(palabra) % largo == 0 and silaba * veces == palabra:
+            return True
     return False
 
 
@@ -83,6 +91,11 @@ def palabras_significativas(texto: str) -> list[str]:
             resultado.append(lista[i])
         i = j + 1
     return resultado
+
+
+def palabras_consulta(texto: str) -> list[str]:
+    """Palabras para buscar: las significativas o, si todo era vocalizacion ("ay ay ay"), todas."""
+    return palabras_significativas(texto) or palabras(texto)
 
 
 def limpiar_transcripcion(texto: str) -> str:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import difflib
+import sqlite3
 from typing import Iterable
 
 from datos.base_datos import BaseDatos
@@ -113,18 +114,35 @@ class Repositorio:
         nombre = " ".join(nombre.split())
         lineas = [" ".join(l.split()) for l in lineas if l and l.strip()]
         if not nombre:
-            raise ValueError("El nombre de la cancion no puede estar vacio.")
+            raise ValueError("El nombre de la canción no puede estar vacío.")
         if not lineas:
-            raise ValueError("La cancion debe tener al menos una linea de letra.")
+            raise ValueError("La canción debe tener al menos una línea de letra.")
         with self.base.candado, self._conexion:
-            cursor = self._conexion.execute(
-                "INSERT INTO NOMBRES (nombre_cancion, nombre_normalizado, artista, origen) VALUES (?, ?, ?, ?)",
-                (nombre, normalizar(nombre), artista.strip(), origen),
+            codigo = self._siguiente_codigo()
+            self._conexion.execute(
+                "INSERT INTO NOMBRES (codigo, nombre_cancion, nombre_normalizado, artista, origen) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (codigo, nombre, normalizar(nombre), artista.strip(), origen),
             )
-            codigo = cursor.lastrowid
             self._insertar_lineas(codigo, lineas)
         self._cambio()
-        return int(codigo)
+        return codigo
+
+    def _siguiente_codigo(self) -> int:
+        """Codigo automatico: uno mas que el mayor usado hasta ahora.
+
+        Se calcula aqui (y no solo con AUTOINCREMENT) para que tambien funcione con
+        una tabla NOMBRES creada sin llave primaria. Se toma en cuenta sqlite_sequence
+        para no reutilizar el codigo de una cancion borrada.
+        """
+        mayor = self._conexion.execute("SELECT COALESCE(MAX(codigo), 0) FROM NOMBRES").fetchone()[0] or 0
+        try:
+            fila = self._conexion.execute("SELECT seq FROM sqlite_sequence WHERE name = 'NOMBRES'").fetchone()
+        except sqlite3.OperationalError:
+            fila = None
+        if fila and fila[0]:
+            mayor = max(int(mayor), int(fila[0]))
+        return int(mayor) + 1
 
     def _insertar_lineas(self, codigo: int, lineas: list[str]) -> None:
         self._conexion.executemany(
@@ -135,7 +153,7 @@ class Repositorio:
     def reemplazar_letra(self, codigo: int, lineas: Iterable[str]) -> None:
         lineas = [" ".join(l.split()) for l in lineas if l and l.strip()]
         if not lineas:
-            raise ValueError("La cancion debe tener al menos una linea de letra.")
+            raise ValueError("La canción debe tener al menos una línea de letra.")
         with self.base.candado, self._conexion:
             self._conexion.execute("DELETE FROM LETRAS WHERE codigo = ?", (codigo,))
             self._insertar_lineas(codigo, lineas)
@@ -144,7 +162,7 @@ class Repositorio:
     def renombrar(self, codigo: int, nombre: str, artista: str | None = None) -> None:
         nombre = " ".join(nombre.split())
         if not nombre:
-            raise ValueError("El nombre de la cancion no puede estar vacio.")
+            raise ValueError("El nombre de la canción no puede estar vacío.")
         with self.base.candado, self._conexion:
             if artista is None:
                 self._conexion.execute(
