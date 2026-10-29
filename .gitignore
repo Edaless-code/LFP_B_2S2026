@@ -1,2 +1,10 @@
 __pycache__/
 *.pyc
+KaraokeInteligente/.buildozer/
+KaraokeInteligente/bin/
+KaraokeInteligente/.venv/
+KaraokeInteligente/modelos/
+KaraokeInteligente/logs/
+KaraokeInteligente/exportaciones/
+KaraokeInteligente/*.db
+KaraokeInteligente/config.json

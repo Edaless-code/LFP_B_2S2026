@@ -1,0 +1,9 @@
+<queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.OPEN_DOCUMENT" />
+            <data android:mimeType="text/*" />
+        </intent>
+    </queries>

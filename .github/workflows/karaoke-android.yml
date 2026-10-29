@@ -1,0 +1,68 @@
+# Compila el APK de Karaoke Inteligente con Buildozer (python-for-android).
+# El APK queda como artefacto descargable de la ejecucion ("KaraokeInteligente-APK").
+name: Karaoke Inteligente - APK Android
+
+on:
+  push:
+    paths:
+      - "KaraokeInteligente/**"
+      - ".github/workflows/karaoke-android.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: karaoke-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: KaraokeInteligente
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Dependencias del sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip autoconf automake libtool libltdl-dev \
+            pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev \
+            build-essential ccache gettext
+
+      - name: Instalar Buildozer
+        run: pip install buildozer==1.6.0 "cython<3.0" setuptools
+
+      - name: Cache de SDK/NDK de Android
+        uses: actions/cache@v4
+        with:
+          path: ~/.buildozer
+          key: buildozer-global-${{ hashFiles('KaraokeInteligente/buildozer.spec') }}
+          restore-keys: buildozer-global-
+
+      - name: Cache de compilacion de python-for-android
+        uses: actions/cache@v4
+        with:
+          path: KaraokeInteligente/.buildozer
+          key: buildozer-app-${{ hashFiles('KaraokeInteligente/buildozer.spec') }}-${{ github.sha }}
+          restore-keys: |
+            buildozer-app-${{ hashFiles('KaraokeInteligente/buildozer.spec') }}-
+
+      - name: Compilar APK (debug)
+        run: yes | buildozer android debug
+
+      - name: Publicar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KaraokeInteligente-APK
+          path: KaraokeInteligente/bin/*.apk
+          if-no-files-found: error
